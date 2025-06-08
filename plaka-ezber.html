@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Türkiye İller ve Plaka Kodları Ezber</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: sans-serif; margin: 0; background: #fafaff; color: #222; }
+        h1 { text-align: center; }
+        .container { max-width: 800px; margin: 20px auto; padding: 8px; }
+        .tabs { display: flex; border-bottom: 2px solid #ddd; margin-bottom: 18px; }
+        .tab-btn {
+            flex: 1; padding: 16px 0; cursor: pointer; background: #f0f0f7; border: none;
+            border-right: 1px solid #ddd; font-size: 1.12em; outline: none; font-weight: bold;
+            transition: background 0.15s;
+        }
+        .tab-btn:last-child { border-right: none; }
+        .tab-btn.active { background: #fff; color: #003366; border-bottom: 2px solid #003366; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 32px 0;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.1s;
+            user-select: none;
+            position: relative;
+            min-height: 90px;
+            font-size: 1.4em;
+        }
+        .card.flipped {
+            background: #003366;
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.7em;
+            letter-spacing: 2px;
+        }
+        .group-picker {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+        .group-picker label { font-weight: bold; }
+        .group-picker input[type=number] {
+            width: 50px; padding: 4px; font-size: 1em; border-radius: 5px; border: 1px solid #bbb;
+        }
+        .group-picker button {
+            padding: 5px 18px; border-radius: 6px; background: #003366; color: #fff; border: none; font-weight: 700; font-size: 1em; cursor: pointer; transition: background 0.15s;
+        }
+        .group-picker button:hover { background: #0050a1; }
+        .bolge-grup { margin-bottom: 32px; }
+        .bolge-baslik {
+            margin: 16px 0 10px 0; font-size: 1.1em; color: #003366; font-weight: bold;
+            border-bottom: 1px solid #ddd; padding-bottom: 4px;
+        }
+        @media (max-width: 600px) {
+            .card-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { flex-direction: column; }
+            .tab-btn { border-right: none; border-bottom: 1px solid #ddd; }
+            .tab-btn:last-child { border-bottom: none; }
+        }
+    </style>
+</head>
+<body>
+<h1>Türkiye İller ve Plaka Kodları Ezberle</h1>
+<div class="container">
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="tab-onemli">Önemli İller</button>
+        <button class="tab-btn" data-tab="tab-tumu">Tüm İller</button>
+        <button class="tab-btn" data-tab="tab-grup">Grup Ezber</button>
+        <button class="tab-btn" data-tab="tab-bolge">Bölgelere Göre</button>
+    </div>
+    <div id="tab-onemli" class="tab-content active">
+        <h2>Önemli İller</h2>
+        <div class="card-grid" id="specialCities"></div>
+    </div>
+    <div id="tab-tumu" class="tab-content">
+        <h2>81 İl Listesi</h2>
+        <div class="card-grid" id="allCities"></div>
+    </div>
+    <div id="tab-grup" class="tab-content">
+        <h2>Grup Ezberleme</h2>
+        <div class="group-picker">
+            <label>Kaçıncı grubu çalışmak istersin? (Her grup 9 il)</label>
+            <input id="groupNum" type="number" min="1" max="9" value="1">
+            <button id="showGroupBtn">Grubu Göster</button>
+        </div>
+        <div class="card-grid" id="groupCards"></div>
+    </div>
+    <div id="tab-bolge" class="tab-content">
+        <h2>Bölgelere Göre İller</h2>
+        <div id="bolgeListesi"></div>
+    </div>
+</div>
+<script>
+    // Tüm il verisi
+    const iller = {
+        "1": "ADANA", "2": "ADIYAMAN", "3": "AFYONKARAHİSAR", "4": "AĞRI", "5": "AMASYA",
+        "6": "ANKARA", "7": "ANTALYA", "8": "ARTVİN", "9": "AYDIN", "10": "BALIKESİR",
+        "11": "BİLECİKK", "12": "BİNGÖL", "13": "BİTLİS", "14": "BOLU", "15": "BURDUR",
+        "16": "BURSA", "17": "ÇANAKKALE", "18": "ÇANKIRI", "19": "ÇORUM", "20": "DENİZLİ",
+        "21": "DİYARBAKIR", "22": "EDİRNE", "23": "ELAZIĞ", "24": "ERZİNCAN", "25": "ERZURUM",
+        "26": "ESKİŞEHİR", "27": "GAZİANTEP", "28": "GİRESUN", "29": "GÜMÜŞHANE", "30": "HAKKARİ",
+        "31": "HATAY", "32": "ISPARTA", "33": "MERSİN", "34": "İSTANBUL", "35": "İZMİR",
+        "36": "KARS", "37": "KASTAMONU", "38": "KAYSERİ", "39": "KIRKLARELİ", "40": "KIRŞEHİR",
+        "41": "KOCAELİ", "42": "KONYA", "43": "KÜTAHYA", "44": "MALATYA", "45": "MANİSA",
+        "46": "KAHRAMANMARAŞ", "47": "MARDİN", "48": "MUĞLA", "49": "MUŞ", "50": "NEVŞEHİR",
+        "51": "NİĞDE", "52": "ORDU", "53": "RİZE", "54": "SAKARYA", "55": "SAMSUN",
+        "56": "SİİRT", "57": "SİNOP", "58": "SİVAS", "59": "TEKİRDAĞ", "60": "TOKAT",
+        "61": "TRABZON", "62": "TUNCELİ", "63": "ŞANLIURFA", "64": "UŞAK", "65": "VAN",
+        "66": "YOZGAT", "67": "ZONGULDAK", "68": "AKSARAY", "69": "BAYBURT", "70": "KARAMAN",
+        "71": "KIRIKKALE", "72": "BATMAN", "73": "ŞIRNAK", "74": "BARTIN", "75": "ARDAHAN",
+        "76": "IĞDIR", "77": "YALOVA", "78": "KARABüK", "79": "KİLİS", "80": "OSMANİYE",
+        "81": "DÜZCE"
+    };
+
+    // Bölge json
+    const bolgeData = {
+        "Akdeniz":[["01","Adana"],["07","Antalya"],["15","Burdur"],["32","Isparta"],["33","Mersin"],["46","Kahramanmaraş"],["80","Osmaniye"]],
+        "Güneydoğu Anadolu":[["02","Adıyaman"],["21","Diyarbakır"],["27","Gaziantep"],["31","Hatay"],["47","Mardin"],["56","Siirt"],["63","Şanlıurfa"],["72","Batman"],["73","Şırnak"],["79","Kilis"]],
+        "Ege":[["03","Afyonkarahisar"],["09","Aydın"],["17","Çanakkale"],["20","Denizli"],["35","İzmir"],["45","Manisa"],["48","Muğla"],["64","Uşak"]],
+        "Doğu Anadolu":[["04","Ağrı"],["12","Bingöl"],["13","Bitlis"],["23","Elazığ"],["24","Erzincan"],["25","Erzurum"],["30","Hakkari"],["36","Kars"],["44","Malatya"],["49","Muş"],["62","Tunceli"],["65","Van"],["75","Ardahan"],["76","Iğdır"]],
+        "Karadeniz":[["05","Amasya"],["08","Artvin"],["14","Bolu"],["19","Çorum"],["28","Giresun"],["29","Gümüşhane"],["37","Kastamonu"],["52","Ordu"],["53","Rize"],["55","Samsun"],["57","Sinop"],["61","Trabzon"],["67","Zonguldak"],["69","Bayburt"],["74","Bartın"],["78","Karabük"],["81","Düzce"]],
+        "İç Anadolu":[["06","Ankara"],["18","Çankırı"],["26","Eskişehir"],["38","Kayseri"],["40","Kırşehir"],["42","Konya"],["43","Kütahya"],["50","Nevşehir"],["51","Niğde"],["58","Sivas"],["60","Tokat"],["66","Yozgat"],["68","Aksaray"],["70","Karaman"],["71","Kırıkkale"]],
+        "Marmara":[["10","Balıkesir"],["11","Bilecik"],["16","Bursa"],["22","Edirne"],["34","İstanbul"],["39","Kırklareli"],["41","Kocaeli"],["54","Sakarya"],["59","Tekirdağ"],["77","Yalova"]]
+    };
+
+    // Önemli iller plaka kodları
+    const specialCityPlaka = ['06', '34', '35', '16', '01', '07', '41', '42', '55', '21', '61'];
+
+    // Kart tıklama (Anki tarzı çevirme)
+    function cardEvents(container) {
+        container.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('click', () => {
+                card.classList.toggle('flipped');
+                if(card.dataset.side === "plaka") {
+                    card.textContent = card.dataset.city;
+                    card.dataset.side = "city";
+                } else {
+                    card.textContent = card.dataset.plaka;
+                    card.dataset.side = "plaka";
+                }
+            });
+        });
+    }
+
+    // Tab navigation
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tab=>tab.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(btn.dataset.tab).classList.add('active');
+        });
+    });
+
+    function renderSpecialCities() {
+        const specialCitiesDiv = document.getElementById('specialCities');
+        specialCitiesDiv.innerHTML = "";
+        const illerArr = Object.entries(iller).map(([plaka, il_adi]) => ({
+            plaka_kodu: plaka.padStart(2, '0'),
+            il_adi
+        }));
+        const specialCities = illerArr.filter(il => specialCityPlaka.includes(il.plaka_kodu));
+        specialCities.forEach(il => {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.textContent = il.plaka_kodu;
+            div.dataset.plaka = il.plaka_kodu;
+            div.dataset.city = il.il_adi;
+            div.dataset.side = "plaka";
+            specialCitiesDiv.appendChild(div);
+        });
+        cardEvents(specialCitiesDiv);
+    }
+
+    function renderAllCities() {
+        const allCitiesDiv = document.getElementById('allCities');
+        allCitiesDiv.innerHTML = "";
+        const illerArr = Object.entries(iller).map(([plaka, il_adi]) => ({
+            plaka_kodu: plaka.padStart(2, '0'),
+            il_adi
+        }));
+        illerArr.forEach(il => {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.textContent = il.plaka_kodu;
+            div.dataset.plaka = il.plaka_kodu;
+            div.dataset.city = il.il_adi;
+            div.dataset.side = "plaka";
+            allCitiesDiv.appendChild(div);
+        });
+        cardEvents(allCitiesDiv);
+    }
+
+    // Group learning
+    function renderGroup(num) {
+        const groupCards = document.getElementById('groupCards');
+        groupCards.innerHTML = "";
+        const illerArr = Object.entries(iller).map(([plaka, il_adi]) => ({
+            plaka_kodu: plaka.padStart(2, '0'),
+            il_adi
+        }));
+        const start = (num-1)*9;
+        let group = illerArr.slice(start, start+9);
+
+        // Shuffle for random practice
+        group = group
+            .map(x => [Math.random(), x])
+            .sort((a,b) => a[0]-b[0])
+            .map(x => x[1]);
+
+        group.forEach(il => {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.textContent = il.plaka_kodu;
+            div.dataset.plaka = il.plaka_kodu;
+            div.dataset.city = il.il_adi;
+            div.dataset.side = "plaka";
+            groupCards.appendChild(div);
+        });
+        cardEvents(groupCards);
+    }
+
+    document.getElementById('showGroupBtn').addEventListener('click', function() {
+        let groupNum = parseInt(document.getElementById('groupNum').value, 10);
+        if (isNaN(groupNum) || groupNum < 1) groupNum = 1;
+        if (groupNum > 9) groupNum = 9;
+        renderGroup(groupNum);
+    });
+
+    // Bölgelere göre gösterim
+    function renderBolgeTab() {
+        const bolgeListesi = document.getElementById('bolgeListesi');
+        bolgeListesi.innerHTML = "";
+        Object.entries(bolgeData).forEach(([bolge, sehirler]) => {
+            const bolgeDiv = document.createElement('div');
+            bolgeDiv.className = 'bolge-grup';
+            const baslik = document.createElement('div');
+            baslik.className = 'bolge-baslik';
+            baslik.textContent = bolge;
+            bolgeDiv.appendChild(baslik);
+
+            const grid = document.createElement('div');
+            grid.className = 'card-grid';
+
+            sehirler.forEach(([plaka, isim]) => {
+                const div = document.createElement('div');
+                div.className = 'card';
+                div.textContent = plaka;
+                div.dataset.plaka = plaka;
+                div.dataset.city = isim;
+                div.dataset.side = "plaka";
+                grid.appendChild(div);
+            });
+
+            bolgeDiv.appendChild(grid);
+            bolgeListesi.appendChild(bolgeDiv);
+            cardEvents(grid);
+        });
+    }
+
+    // Init
+    renderSpecialCities();
+    renderAllCities();
+    renderGroup(1);
+    renderBolgeTab();
+
+    // Enter key triggers group
+    document.getElementById('groupNum').addEventListener('keydown', function(e){
+        if(e.key === 'Enter') document.getElementById('showGroupBtn').click();
+    });
+
+</script>
+</body>
+</html>
