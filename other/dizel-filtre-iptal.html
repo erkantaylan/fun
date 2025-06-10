@@ -1,0 +1,458 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emisyon Sistemi İptali Analizi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+
+        .system-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .system-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .opf .system-title {
+            color: #e74c3c;
+            border-color: #e74c3c;
+        }
+
+        .katalitik .system-title {
+            color: #f39c12;
+            border-color: #f39c12;
+        }
+
+        .o2 .system-title {
+            color: #e67e22;
+            border-color: #e67e22;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .kazanc { color: #27ae60; }
+        .kayip { color: #e74c3c; }
+        .saglik { color: #8e44ad; }
+
+        .subsection {
+            margin-bottom: 15px;
+            padding-left: 15px;
+            border-left: 3px solid #ecf0f1;
+        }
+
+        .subsection h4 {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        .item-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .item-list li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .item-list li:last-child {
+            border-bottom: none;
+        }
+
+        .item-list li::before {
+            content: "•";
+            position: absolute;
+            left: 8px;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .kazanc .item-list li::before { color: #27ae60; }
+        .kayip .item-list li::before { color: #e74c3c; }
+
+        .price {
+            font-weight: 600;
+            background: rgba(52, 152, 219, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #2980b9;
+        }
+
+        .warning {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+
+        .summary {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            text-align: center;
+        }
+
+        .cost-table {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .cost-item {
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .cost-negative {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        .cost-positive {
+            background: linear-gradient(135deg, #51cf66, #40c057);
+            color: white;
+        }
+
+        .conclusion {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .conclusion h3 {
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .conclusion ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .conclusion li {
+            padding: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .conclusion li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .system-title {
+                font-size: 1.5em;
+            }
+
+            .cost-table {
+                grid-template-columns: 1fr;
+            }
+
+            .system-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🚗 Emisyon Sistemi İptali Analizi</h1>
+        <p>Motor sağlığı ve maliyet perspektifinden detaylı inceleme</p>
+    </div>
+
+    <div class="system-card opf">
+        <h2 class="system-title">
+            🔥 OPF (DPF) İptali
+        </h2>
+
+        <div class="section kazanc">
+            <h3 class="section-title">💰 Kazançlar</h3>
+
+            <div class="subsection">
+                <h4>Kısa Vadeli:</h4>
+                <ul class="item-list">
+                    <li>Rejenerasyon yakıt tüketimi ortadan kalkar <span class="price">(~%1-3 tasarruf)</span></li>
+                    <li>Turbo daha rahat çalışır (düşük geri basınç)</li>
+                    <li>"Limp mode" sorunu ortadan kalkar</li>
+                    <li>DPF temizleme/değişim gerekmez <span class="price">(15.000-25.000 TL tasarruf)</span></li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h4>Uzun Vadeli:</h4>
+                <ul class="item-list">
+                    <li>Turbo ömrü uzayabilir (daha az geri basınç)</li>
+                    <li>Motor yağı daha az kirlenebilir</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section kayip">
+            <h3 class="section-title">📉 Kayıplar</h3>
+
+            <div class="subsection">
+                <h4>Kısa Vadeli:</h4>
+                <ul class="item-list">
+                    <li>İptal maliyeti <span class="price">(5.000-15.000 TL)</span></li>
+                    <li>Emisyon testi geçememe riski</li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h4>Uzun Vadeli:</h4>
+                <ul class="item-list">
+                    <li>Motor içi karbon birikimi artabilir</li>
+                    <li>Silindir-piston aşınması artabilir</li>
+                    <li>Aracın ikinci el değeri düşer</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="system-card katalitik">
+        <h2 class="system-title">
+            ⚡ Katalitik İptali
+        </h2>
+
+        <div class="section kazanc">
+            <h3 class="section-title">💰 Kazançlar</h3>
+
+            <div class="subsection">
+                <h4>Kısa Vadeli:</h4>
+                <ul class="item-list">
+                    <li>Egzoz akışı iyileşir <span class="price">(~%2-5 güç artışı)</span></li>
+                    <li>Yakıt tüketimi azalabilir <span class="price">(~%3-7)</span></li>
+                    <li>Katalitik değişim maliyeti ortadan kalkar <span class="price">(8.000-20.000 TL)</span></li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h4>Uzun Vadeli:</h4>
+                <ul class="item-list">
+                    <li>Egzoz sistemi ömrü uzayabilir (daha az ısı)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section kayip">
+            <h3 class="section-title">📉 Kayıplar</h3>
+
+            <div class="subsection">
+                <h4>Kısa Vadeli:</h4>
+                <ul class="item-list">
+                    <li>İptal/bypass maliyeti <span class="price">(3.000-8.000 TL)</span></li>
+                    <li>Emisyon kontrolünde yakalanma riski</li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h4>Uzun Vadeli:</h4>
+                <ul class="item-list">
+                    <li><strong>Motor içi korozyon:</strong> Zararlı gazlar motor içinde kalır</li>
+                    <li>Egzoz valfi hasarı riski artar</li>
+                    <li>O2 sensör ömrü kısalabilir</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="system-card o2">
+        <h2 class="system-title">
+            🔧 O2 Sensör İptali
+        </h2>
+
+        <div class="section kazanc">
+            <h3 class="section-title">💰 Kazançlar</h3>
+
+            <div class="subsection">
+                <h4>Kısa Vadeli:</h4>
+                <ul class="item-list">
+                    <li>Sensör arıza uyarıları ortadan kalkar</li>
+                    <li>O2 sensör değişim maliyeti tasarrufu <span class="price">(500-2.000 TL/adet)</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section kayip">
+            <h3 class="section-title">📉 Kayıplar</h3>
+
+            <div class="subsection">
+                <h4>Kısa Vadeli:</h4>
+                <ul class="item-list">
+                    <li>İptal/emülasyon maliyeti <span class="price">(2.000-5.000 TL)</span></li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h4>Uzun Vadeli:</h4>
+                <ul class="item-list">
+                    <li><strong>EN BÜYÜK RİSK:</strong> Yakıt karışımı optimizasyonu kaybolur</li>
+                    <li>Zengin karışım → Motor yağı seyrelmesi</li>
+                    <li>Fakir karışım → Piston/valf yanması</li>
+                    <li>Enjektör ömrü kısalır</li>
+                    <li><strong>Motor ömrü ciddi şekilde kısalabilir</strong></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="warning">
+            ⚠️ <strong>Uyarı:</strong> O2 sensör iptali en riskli işlemdir. Motor hasarı riski çok yüksektir!
+        </div>
+    </div>
+
+    <div class="system-card">
+        <h2 class="system-title saglik">
+            🏥 Şoför Sağlığı Riskleri
+        </h2>
+
+        <div class="section">
+            <ul class="item-list">
+                <li><strong>Kabin içi kirli hava:</strong> Özellikle durma-kalkma trafiğinde</li>
+                <li><strong>NOx gazları:</strong> Solunum yolu tahrişi</li>
+                <li><strong>Karbon monoksit:</strong> Baş ağrısı, yorgunluk</li>
+                <li><strong>Partikül madde:</strong> Akciğer sorunları</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="summary">
+        <h2>📊 Toplam Maliyet Analizi</h2>
+
+        <div class="cost-table">
+            <div class="cost-item cost-negative">
+                <h3>💸 İptal Maliyetleri</h3>
+                <p><strong>10.000 - 28.000 TL</strong></p>
+                <small>Tüm sistemler için</small>
+            </div>
+
+            <div class="cost-item cost-positive">
+                <h3>💰 Potansiyel Tasarruf (5 yıl)</h3>
+                <p><strong>35.000 - 70.000 TL</strong></p>
+                <small>Yakıt + Bakım</small>
+            </div>
+        </div>
+
+        <div class="cost-table">
+            <div class="cost-item cost-negative">
+                <h3>⚠️ Potansiyel Kayıplar</h3>
+                <p><strong>50.000 - 150.000 TL</strong></p>
+                <small>Motor hasarı riski</small>
+            </div>
+
+            <div class="cost-item cost-negative">
+                <h3>📉 Değer Kaybı</h3>
+                <p><strong>%10 - 20</strong></p>
+                <small>Araç değerinde</small>
+            </div>
+        </div>
+
+        <div class="conclusion">
+            <h3>🎯 Sonuç ve Öneriler</h3>
+            <ul>
+                <li><strong>En riskli iptal:</strong> O2 sensör (motor ömrünü ciddi etkiler)</li>
+                <li><strong>En güvenli iptal:</strong> OPF (sadece çevresel etki)</li>
+                <li><strong>En karlı iptal:</strong> OPF (yüksek bakım maliyeti tasarrufu)</li>
+                <li><strong>Genel değerlendirme:</strong> Kısa vadede karlı görünse de, özellikle O2 sensör iptali uzun vadede büyük motor hasarlarına yol açabilir</li>
+            </ul>
+        </div>
+    </div>
+</div>
+</body>
+</html>
