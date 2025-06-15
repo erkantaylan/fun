@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Çıkarma Alıştırması</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        #math-practice-app {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 25px 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+        }
+        h1 {
+            color: #3a3372; /* Deep indigo */
+            margin-bottom: 15px;
+        }
+        h2 {
+            color: #4a4382; /* Slightly lighter indigo */
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        #difficulty-selector-area label {
+            display: block;
+            margin: 12px 0;
+            font-size: 1.1em;
+            color: #555;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        #difficulty-selector-area label:hover {
+            background-color: #e9e6f3;
+        }
+        #difficulty-selector-area input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+        button {
+            background-color: #5cb85c; /* Green */
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.05em;
+            margin-top: 15px;
+            transition: background-color 0.3s, transform 0.1s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button:hover {
+            background-color: #4cae4c; /* Darker green */
+            transform: translateY(-1px);
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        #start-random-level-quiz-button {
+            background-color: #f0ad4e; /* Orange */
+        }
+        #start-random-level-quiz-button:hover {
+            background-color: #ec971f; /* Darker orange */
+        }
+        #game-area {
+            margin-top: 25px;
+        }
+        #question-text {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 25px 0;
+            color: #2c3e50; /* Dark blue/grey */
+            padding: 15px;
+            background-color: #ecf0f1; /* Light grey */
+            border-radius: 8px;
+            border-left: 5px solid #3498db; /* Blue accent */
+        }
+        #answer-input {
+            padding: 12px;
+            font-size: 1.2em;
+            width: 60%;
+            max-width: 220px;
+            margin-right: 10px;
+            border: 2px solid #bdc3c7; /* Grey border */
+            border-radius: 6px;
+            transition: border-color 0.3s;
+        }
+        #answer-input:focus {
+            border-color: #3498db; /* Blue border on focus */
+            outline: none;
+        }
+        #submit-answer-button {
+            background-color: #3498db; /* Blue */
+        }
+        #submit-answer-button:hover {
+            background-color: #2980b9; /* Darker blue */
+        }
+        #next-question-button {
+            background-color: #9b59b6; /* Purple */
+        }
+        #next-question-button:hover {
+            background-color: #8e44ad; /* Darker purple */
+        }
+        #feedback-message {
+            margin-top: 18px;
+            font-size: 1.2em;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        .correct {
+            color: #27ae60; /* Green text */
+            background-color: #e6f7ee; /* Light green background */
+            border: 1px solid #a7d7c5;
+        }
+        .incorrect {
+            color: #e74c3c; /* Red text */
+            background-color: #fdedec; /* Light red background */
+            border: 1px solid #f5b7b1;
+        }
+        #score-display, #question-number, #time-taken-display {
+            font-size: 1.1em;
+            color: #555;
+            margin-top: 8px;
+        }
+        #game-over-area {
+            padding: 20px;
+        }
+        #game-over-area h2 {
+            color: #0056b3;
+        }
+        #game-over-area button {
+            margin: 10px 8px;
+        }
+        #play-again-button {
+            background-color: #5cb85c;
+        }
+        #play-again-button:hover {
+            background-color: #4cae4c;
+        }
+        #change-mode-button {
+            background-color: #f0ad4e;
+        }
+        #change-mode-button:hover {
+            background-color: #ec971f;
+        }
+
+        .quiz-mode-buttons button {
+            margin: 8px;
+        }
+    </style>
+</head>
+<body>
+<div id="math-practice-app">
+    <h1>Çıkarma Alıştırması</h1>
+
+    <div id="setup-area">
+        <div id="difficulty-selector-area">
+            <h2>Zorluk Seviyesi Seçin:</h2>
+            <label><input type="radio" name="difficulty" value="1" checked> Seviye 1: Temel çıkarma (örneğin, 5 - (-2))</label>
+            <label><input type="radio" name="difficulty" value="2"> Seviye 2: Üç sayı (örneğin, 10 - 3 - (-5))</label>
+            <label><input type="radio" name="difficulty" value="3"> Seviye 3: Parantezler (örneğin, (8 - (-2)) - 4)</label>
+            <label><input type="radio" name="difficulty" value="4"> Seviye 4: Daha fazla sayı ve parantez</label>
+            <label><input type="radio" name="difficulty" value="5"> Seviye 5: Karmaşık (6+ sayı, parantez, çarpma)</label>
+        </div>
+        <div class="quiz-mode-buttons">
+            <button id="start-selected-level-quiz-button">Seçili Seviye İçin Sınav Başlat</button>
+            <button id="start-random-level-quiz-button">Rastgele Seviyeli Sınav Başlat</button>
+        </div>
+    </div>
+
+    <div id="game-area" style="display:none;">
+        <p id="question-number"></p>
+        <div id="question-text"></div>
+        <input type="text" id="answer-input" placeholder="Cevabınız">
+        <button id="submit-answer-button">Cevabı Kontrol Et</button>
+        <p id="feedback-message"></p>
+        <p id="score-display"></p>
+        <button id="next-question-button" style="display:none;">Sonraki Soru</button>
+    </div>
+
+    <div id="game-over-area" style="display:none;">
+        <h2>Sınav Tamamlandı!</h2>
+        <p id="final-score-message"></p>
+        <p id="time-taken-display"></p>
+        <button id="play-again-button">Tekrar Oyna (Aynı Mod)</button>
+        <button id="change-mode-button">Ana Menüye Dön</button>
+    </div>
+</div>
+
+<script>
+    const setupArea = document.getElementById('setup-area');
+    const gameArea = document.getElementById('game-area');
+    const gameOverArea = document.getElementById('game-over-area');
+
+    const startSelectedLevelQuizButton = document.getElementById('start-selected-level-quiz-button');
+    const startRandomLevelQuizButton = document.getElementById('start-random-level-quiz-button');
+
+    const questionNumberDisplay = document.getElementById('question-number');
+    const questionTextDisplay = document.getElementById('question-text');
+    const answerInput = document.getElementById('answer-input');
+    const submitAnswerButton = document.getElementById('submit-answer-button');
+    const feedbackMessage = document.getElementById('feedback-message');
+    const scoreDisplay = document.getElementById('score-display');
+    const nextQuestionButton = document.getElementById('next-question-button');
+
+    const finalScoreMessage = document.getElementById('final-score-message');
+    const timeTakenDisplay = document.getElementById('time-taken-display');
+    const playAgainButton = document.getElementById('play-again-button');
+    const changeModeButton = document.getElementById('change-mode-button');
+
+    let currentDifficultySettings = { type: 'selected', level: 1 };
+    let questions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+    const totalQuestionsPerRound = 10;
+    let quizStartTime;
+
+    const correctMessages = [
+        "Harika! Tam isabet!",
+        "Süpersin! Doğru cevap.",
+        "Mükemmel! Aynen böyle devam.",
+        "Çok iyi! Bildin.",
+        "Bravo! Doğru yoldasın."
+    ];
+
+    const incorrectMessages = [
+        "Neredeyse! Doğru cevap {correctAnswer} olacaktı.",
+        "Bu biraz zorladı galiba. Cevap: {correctAnswer}.",
+        "Üzülme, pratikle daha iyi olacak! Doğrusu: {correctAnswer}.",
+        "Bir dahaki sefere! Cevap {correctAnswer} idi.",
+        "Yanlış oldu ama pes etmek yok! Cevap: {correctAnswer}."
+    ];
+
+    function getRandomMessage(messagesArray) {
+        return messagesArray[Math.floor(Math.random() * messagesArray.length)];
+    }
+
+    function generateNumber(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function formatNum(n) {
+        return n < 0 ? `(${n})` : `${n}`;
+    }
+
+    function generateQuestion(difficulty) {
+        let questionText = '';
+        let answer = 0;
+        let n = [];
+
+        switch (difficulty) {
+            case 1:
+                n[0] = generateNumber(-10, 10);
+                n[1] = generateNumber(-10, 10);
+                questionText = `${formatNum(n[0])} - ${formatNum(n[1])}`;
+                answer = n[0] - n[1];
+                break;
+            case 2:
+                n[0] = generateNumber(-20, 20);
+                n[1] = generateNumber(-10, 10);
+                n[2] = generateNumber(-10, 10);
+                questionText = `${formatNum(n[0])} - ${formatNum(n[1])} - ${formatNum(n[2])}`;
+                answer = n[0] - n[1] - n[2];
+                break;
+            case 3:
+                n[0] = generateNumber(-30, 30);
+                n[1] = generateNumber(-15, 15);
+                n[2] = generateNumber(-15, 15);
+                if (Math.random() < 0.5) {
+                    questionText = `(${formatNum(n[0])} - ${formatNum(n[1])}) - ${formatNum(n[2])}`;
+                    answer = (n[0] - n[1]) - n[2];
+                } else {
+                    questionText = `${formatNum(n[0])} - (${formatNum(n[1])} - ${formatNum(n[2])})`;
+                    answer = n[0] - (n[1] - n[2]);
+                }
+                break;
+            case 4:
+                n[0] = generateNumber(-40, 40);
+                n[1] = generateNumber(-20, 20);
+                n[2] = generateNumber(-20, 20);
+                n[3] = generateNumber(-20, 20);
+                const choice4 = Math.floor(Math.random() * 3);
+                if (choice4 === 0) {
+                    questionText = `(${formatNum(n[0])} - ${formatNum(n[1])}) - (${formatNum(n[2])} - ${formatNum(n[3])})`;
+                    answer = (n[0] - n[1]) - (n[2] - n[3]);
+                } else if (choice4 === 1) {
+                    questionText = `${formatNum(n[0])} - (${formatNum(n[1])} - ${formatNum(n[2])}) - ${formatNum(n[3])}`;
+                    answer = n[0] - (n[1] - n[2]) - n[3];
+                } else {
+                    questionText = `${formatNum(n[0])} - ${formatNum(n[1])} - (${formatNum(n[2])} - ${formatNum(n[3])})`;
+                    answer = n[0] - n[1] - (n[2] - n[3]);
+                }
+                break;
+            case 5:
+                for (let i = 0; i < 6; i++) n.push(generateNumber(-15, 15));
+                const choice5 = Math.floor(Math.random() * 3);
+
+            function ensureNonZeroMultiplier(val) {
+                return val === 0 ? (generateNumber(1,3) * (Math.random() < 0.5 ? 1: -1)) : val;
+            }
+
+                if (choice5 === 0) {
+                    n[2] = ensureNonZeroMultiplier(n[2]);
+                    questionText = `(${formatNum(n[0])} - ${formatNum(n[1])}) * ${formatNum(n[2])} - (${formatNum(n[3])} - ${formatNum(n[4])}) - ${formatNum(n[5])}`;
+                    answer = (n[0] - n[1]) * n[2] - (n[3] - n[4]) - n[5];
+                } else if (choice5 === 1) {
+                    n[1] = ensureNonZeroMultiplier(n[1]);
+                    n[2] = ensureNonZeroMultiplier(n[2]);
+                    questionText = `${formatNum(n[0])} - (${formatNum(n[1])} * ${formatNum(n[2])}) - ${formatNum(n[3])} - (${formatNum(n[4])} - ${formatNum(n[5])})`;
+                    answer = n[0] - (n[1] * n[2]) - n[3] - (n[4] - n[5]);
+                } else {
+                    n[0] = ensureNonZeroMultiplier(n[0]);
+                    n[1] = ensureNonZeroMultiplier(n[1]);
+                    n[4] = ensureNonZeroMultiplier(n[4]);
+                    n[5] = ensureNonZeroMultiplier(n[5]);
+                    questionText = `(${formatNum(n[0])} * ${formatNum(n[1])}) - (${formatNum(n[2])} - ${formatNum(n[3])}) - (${formatNum(n[4])} * ${formatNum(n[5])})`;
+                    answer = (n[0] * n[1]) - (n[2] - n[3]) - (n[4] * n[5]);
+                }
+                break;
+        }
+        return { questionText, answer };
+    }
+
+    function startQuiz() {
+        questions = [];
+        quizStartTime = new Date();
+        for (let i = 0; i < totalQuestionsPerRound; i++) {
+            let difficultyToUse;
+            if (currentDifficultySettings.type === 'random') {
+                difficultyToUse = Math.floor(Math.random() * 5) + 1;
+            } else {
+                difficultyToUse = currentDifficultySettings.level;
+            }
+            questions.push(generateQuestion(difficultyToUse));
+        }
+        currentQuestionIndex = 0;
+        score = 0;
+
+        setupArea.style.display = 'none';
+        gameOverArea.style.display = 'none';
+        gameArea.style.display = 'block';
+
+        displayQuestion();
+        updateScoreDisplay();
+    }
+
+    startSelectedLevelQuizButton.addEventListener('click', () => {
+        currentDifficultySettings.type = 'selected';
+        currentDifficultySettings.level = parseInt(document.querySelector('input[name="difficulty"]:checked').value);
+        startQuiz();
+    });
+
+    startRandomLevelQuizButton.addEventListener('click', () => {
+        currentDifficultySettings.type = 'random';
+        currentDifficultySettings.level = null;
+        startQuiz();
+    });
+
+
+    function displayQuestion() {
+        if (currentQuestionIndex < totalQuestionsPerRound) {
+            const q = questions[currentQuestionIndex];
+            questionTextDisplay.textContent = q.questionText + " = ?";
+            questionNumberDisplay.textContent = `Soru ${currentQuestionIndex + 1} / ${totalQuestionsPerRound}`;
+            answerInput.value = '';
+            feedbackMessage.textContent = '';
+            feedbackMessage.className = '';
+            answerInput.disabled = false;
+            answerInput.focus();
+            submitAnswerButton.disabled = false;
+            nextQuestionButton.style.display = 'none';
+        } else {
+            endQuiz();
+        }
+    }
+
+    function handleSubmitAnswer() {
+        const userAnswerText = answerInput.value.trim();
+        if (userAnswerText === "") {
+            feedbackMessage.textContent = "Lütfen bir cevap girin.";
+            feedbackMessage.className = 'incorrect';
+            return;
+        }
+        const userAnswer = parseInt(userAnswerText);
+
+        if (isNaN(userAnswer)) {
+            feedbackMessage.textContent = "Lütfen geçerli bir sayı girin.";
+            feedbackMessage.className = 'incorrect';
+            return;
+        }
+
+        const correctAnswer = questions[currentQuestionIndex].answer;
+        answerInput.disabled = true;
+
+        if (userAnswer === correctAnswer) {
+            feedbackMessage.textContent = getRandomMessage(correctMessages);
+            feedbackMessage.className = 'correct';
+            score++;
+        } else {
+            let msg = getRandomMessage(incorrectMessages);
+            feedbackMessage.textContent = msg.replace("{correctAnswer}", correctAnswer);
+            feedbackMessage.className = 'incorrect';
+        }
+
+        submitAnswerButton.disabled = true;
+        nextQuestionButton.style.display = 'inline-block';
+        nextQuestionButton.focus();
+        updateScoreDisplay();
+    }
+
+    function handleNextQuestion() {
+        currentQuestionIndex++;
+        displayQuestion();
+    }
+
+    function updateScoreDisplay() {
+        if (currentQuestionIndex < totalQuestionsPerRound) {
+            const questionsAnswered = (answerInput.disabled || submitAnswerButton.disabled) ? currentQuestionIndex + 1 : currentQuestionIndex;
+            scoreDisplay.textContent = `Skor: ${score} / ${questionsAnswered}`;
+        } else {
+            scoreDisplay.textContent = `Skor: ${score} / ${totalQuestionsPerRound}`;
+        }
+    }
+
+    answerInput.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter' && !submitAnswerButton.disabled) {
+            handleSubmitAnswer();
+        }
+    });
+
+    function formatTime(milliseconds) {
+        const totalSeconds = Math.floor(milliseconds / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        let timeString = "";
+        if (minutes > 0) {
+            timeString += `${minutes} dakika `;
+        }
+        timeString += `${seconds} saniye`;
+        return timeString;
+    }
+
+    function endQuiz() {
+        const quizEndTime = new Date();
+        const timeTaken = quizEndTime - quizStartTime;
+
+        gameArea.style.display = 'none';
+        gameOverArea.style.display = 'block';
+        finalScoreMessage.textContent = `${totalQuestionsPerRound} sorudan ${score} tane doğru yaptınız!`;
+        timeTakenDisplay.textContent = `Tamamlama Süresi: ${formatTime(timeTaken)}`;
+    }
+
+    submitAnswerButton.addEventListener('click', handleSubmitAnswer);
+    nextQuestionButton.addEventListener('click', handleNextQuestion);
+
+    playAgainButton.addEventListener('click', () => {
+        gameOverArea.style.display = 'none';
+        startQuiz();
+    });
+
+    changeModeButton.addEventListener('click', () => {
+        gameOverArea.style.display = 'none';
+        setupArea.style.display = 'block';
+        scoreDisplay.textContent = `Skor: 0/0`;
+        questionNumberDisplay.textContent = "";
+        feedbackMessage.textContent = "";
+        feedbackMessage.className = "";
+    });
+
+    // Initialize score display
+    scoreDisplay.textContent = `Skor: 0/0`;
+
+</script>
+</body>
+</html>

@@ -1,466 +1,78 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Çarpım Tablosu Testi</title>
+    <title>Çarpım Tablosu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../style.css">
     <style>
-        :root {
-            --main-bg: #fff8e1;
-            --primary: #ff9800;
-            --primary-dark: #f57c00;
-            --accent: #ffd54f;
-            --success: #43a047;
-            --error: #e53935;
-            --question-bg: #fff3e0;
-            --input-bg: #fffde7;
-            --shadow: 0 4px 24px 0 rgba(255,152,0,0.13);
-            --tab-unselected: #ffe0b2;
-            --tab-border: #ffd54f;
-        }
         body {
+            background: linear-gradient(135deg, #eef6ff 0%, #f0f4f9 100%);
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
             margin: 0;
-            padding: 0;
-            background: var(--main-bg);
-            font-family: 'Segoe UI', Arial, sans-serif;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
         .container {
-            width: 100%;
-            max-width: 430px;
-            margin: 0 auto;
-            padding: 32px 12px 12px 12px;
-            box-sizing: border-box;
+            max-width: 480px;
+            margin: 64px auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 6px 36px rgba(0,32,64,0.07);
+            padding: 36px 28px 32px 28px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-        .title {
-            text-align: center;
-            font-size: 2.7rem;
-            font-weight: 900;
-            margin-bottom: 16px;
-            color: var(--primary-dark);
-            letter-spacing: -1px;
-            text-shadow: 1px 2px 0 var(--accent);
-        }
-        .desc {
-            font-size: 1.2rem;
-            color: #555;
-            text-align: center;
-            margin-bottom: 22px;
-        }
-
-        .mode-tabbar {
-            display: flex;
-            width: 100%;
-            max-width: 370px;
-            margin: 0 auto 20px auto;
-            box-shadow: var(--shadow);
-            border-radius: 18px;
-            background: var(--tab-unselected);
-            overflow: hidden;
-            position: relative;
-        }
-        .mode-btn {
-            flex: 1 1 0;
-            padding: 19px 0;
-            font-size: 1.19rem;
-            font-weight: 700;
-            border: none;
-            color: var(--primary-dark);
-            background: transparent;
-            cursor: pointer;
-            transition: color 0.17s, background 0.18s, box-shadow 0.18s;
-            outline: none;
-            position: relative;
-            z-index: 1;
-            box-shadow: none;
-            border-radius: 0;
-            letter-spacing: 0.5px;
-        }
-        .mode-btn.active {
-            color: #fff;
-            background: var(--primary);
-            box-shadow: 0 6px 16px 0 rgba(255,152,0,0.13), 0 1.5px 0 var(--primary-dark) inset;
-            font-size: 1.25rem;
-            font-weight: 800;
-            z-index: 2;
-            border-radius: 18px;
-        }
-        .mode-btn:not(.active):hover {
-            background: var(--accent);
-            color: var(--primary-dark);
-        }
-        .mode-btn:not(:last-child) {
-            border-right: 2px solid var(--tab-border);
-        }
-
-        .start-btn, .answer-btn {
-            padding: 18px;
-            font-size: 1.35rem;
-            font-weight: 700;
-            border: none;
-            border-radius: 24px;
-            background: linear-gradient(90deg, var(--primary) 70%, var(--accent));
-            color: #fff;
-            cursor: pointer;
-            margin-top: 10px;
-            width: 100%;
-            box-shadow: var(--shadow);
-            transition: background 0.18s, transform 0.1s;
-        }
-        .start-btn:active, .answer-btn:active {
-            background: var(--primary-dark);
-            transform: scale(0.98);
-        }
-        .timer {
-            font-size: 1.45rem;
-            font-weight: 700;
-            color: var(--primary-dark);
-            background: var(--accent);
-            padding: 8px 22px;
-            border-radius: 18px;
-            margin: 0 auto 18px auto;
-            display: inline-block;
-            letter-spacing: 2px;
-            box-shadow: var(--shadow);
-        }
-        .question-card {
-            background: var(--question-bg);
-            border-radius: 24px;
-            box-shadow: var(--shadow);
-            padding: 28px 10px;
-            margin: 20px 0 0 0;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .question-number {
-            color: var(--primary-dark);
-            font-size: 1.15rem;
-            margin-bottom: 8px;
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
-        .question-text {
-            font-size: 2.6rem;
-            color: var(--primary);
-            margin-bottom: 20px;
-            font-weight: 800;
-            letter-spacing: 2px;
-            text-shadow: 0 2px 0 #fffde7;
-        }
-        .answer-input {
-            font-size: 2rem;
-            padding: 12px 20px;
-            border: 2px solid var(--primary);
-            border-radius: 18px;
-            outline: none;
-            background: var(--input-bg);
-            text-align: center;
-            width: 90%;
-            margin-bottom: 18px;
-            box-sizing: border-box;
-            font-weight: 600;
-            color: #333;
-            transition: border 0.2s;
-        }
-        .answer-input:focus {
-            border: 2px solid var(--primary-dark);
-            background: #fffbe8;
-        }
-        .feedback-msg {
-            min-height: 36px;
-            margin-bottom: 8px;
-            font-size: 1.17rem;
-            font-weight: 700;
-            text-align: center;
-            color: var(--primary-dark);
-            letter-spacing: 0.5px;
-            transition: color 0.2s;
-        }
-        .feedback-msg.success { color: var(--success);}
-        .feedback-msg.error { color: var(--error);}
-        .result-card {
-            background: #e3ffe8;
-            color: var(--success);
-            font-size: 1.25rem;
-            padding: 24px 14px;
-            border-radius: 16px;
-            text-align: center;
-            margin-top: 28px;
-            box-shadow: var(--shadow);
-            font-weight: 600;
-        }
-        .result-card .score {
+        h1 {
             font-size: 2.2rem;
-            color: var(--primary-dark);
-            font-weight: 900;
+            letter-spacing: 1px;
+            font-weight: 800;
+            margin-bottom: 30px;
+            color: #224477;
         }
-        .result-card .time {
-            font-size: 1.3rem;
-            color: #333;
-            font-weight: 600;
+        .level {
+            margin-bottom: 20px;
+            width: 100%;
         }
-        .again-btn {
-            background: linear-gradient(90deg, var(--success) 60%, var(--accent) 100%);
-            color: #fff;
-            margin-top: 24px;
+        .level button {
+            padding: 10px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            background-color: #3960c3;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
         }
-        @media (max-width: 500px) {
-            .container {
-                padding: 10px 1vw;
-            }
-            .title { font-size: 2.1rem; }
-            .question-text { font-size: 2rem; }
-            .answer-input { font-size: 1.5rem;}
-            .result-card .score { font-size: 1.5rem;}
-            .mode-tabbar { max-width: none; }
+        .level button:hover {
+            background-color: #224477;
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="title">Çarpım Tablosu Testi</div>
-    <div class="desc">
-        4 ile 9 arasında rastgele çarpma soruları.<br>
-        <span style="color:var(--primary-dark);font-weight:700;">Başlamak için modu seç!</span>
+    <h1>Çarpım Tablosu</h1>
+    <div class="level">
+        <button onclick="startPractice(1)">Seviye 1</button>
     </div>
-    <div class="mode-tabbar" role="tablist" aria-label="Mod Seçimi">
-        <button class="mode-btn active"
-                id="quizModeBtn"
-                onclick="selectMode('quiz')"
-                role="tab"
-                aria-selected="true"
-                aria-controls="main-area">
-            Test Modu
-        </button>
-        <button class="mode-btn"
-                id="practiceModeBtn"
-                onclick="selectMode('practice')"
-                role="tab"
-                aria-selected="false"
-                aria-controls="main-area">
-            Pratik Modu
-        </button>
+    <div class="level">
+        <button onclick="startPractice(2)">Seviye 2</button>
     </div>
-    <div id="main-area">
-        <button class="start-btn" onclick="startQuiz()">Başla</button>
+    <div class="level">
+        <button onclick="startPractice(3)">Seviye 3</button>
+    </div>
+    <div class="level">
+        <button onclick="startPractice(4)">Seviye 4</button>
+    </div>
+    <div class="level">
+        <button onclick="startPractice(5)">Seviye 5</button>
     </div>
 </div>
+
 <script>
-    // Config
-    const SORU_ADEDI = 8; // Test modu için kaç soru?
-    const MIN = 4, MAX = 9;
-
-    // Motivational/funny Turkish feedback
-    const FEEDBACK_CORRECT = [
-        "Harikasın! 🏆", "Süper! 🚀", "Doğru, işte bu! 😎", "Matematik canavarı!", "Jet hızıyla doğru!",
-        "Cevap on numara! 👏", "Bingo! 🎉", "Akıl küpü!", "Yıldız gibi parlıyorsun! 🌟", "Şahane!"
-    ];
-    const FEEDBACK_WRONG = [
-        "Olmadı, bir dahaki sefere! 😅", "Az kalsın! 🙃", "Yanlış, ama üzülme! 😉",
-        "Matematik bazen zordur!", "Biraz daha dikkat! 🔍", "Olur öyle, devam!", "Bir kahve mi lazım? ☕"
-    ];
-
-    // State
-    let questions = [];
-    let userAnswers = [];
-    let current = 0;
-    let timer = 0, timerInterval = null;
-    let startedAt = null;
-    let mode = 'quiz'; // 'quiz' or 'practice'
-
-    // Mode selection
-    function selectMode(newMode) {
-        mode = newMode;
-        document.getElementById('quizModeBtn').classList.toggle('active', mode === 'quiz');
-        document.getElementById('practiceModeBtn').classList.toggle('active', mode === 'practice');
-        document.getElementById('quizModeBtn').setAttribute('aria-selected', mode === 'quiz');
-        document.getElementById('practiceModeBtn').setAttribute('aria-selected', mode === 'practice');
-        document.getElementById('main-area').innerHTML = `<button class="start-btn" onclick="startQuiz()">Başla</button>`;
-    }
-
-    function generateQuestions(n) {
-        const qs = [];
-        for(let i=0; i<n; ++i) {
-            let a = rand(MIN,MAX), b = rand(MIN,MAX);
-            if (Math.random() > 0.5) [a, b] = [b, a];
-            qs.push({a, b, idx:i+1});
-        }
-        return qs;
-    }
-    function rand(min, max) {
-        return Math.floor(Math.random()*(max-min+1))+min;
-    }
-    function randomChoice(arr) {
-        return arr[Math.floor(Math.random()*arr.length)];
-    }
-
-    function startQuiz() {
-        if(mode === 'quiz') {
-            questions = generateQuestions(SORU_ADEDI);
-            userAnswers = [];
-            current = 0;
-            timer = 0;
-            startedAt = Date.now();
-            document.getElementById('main-area').innerHTML = `
-          <div class="timer" id="timer-area">0:00</div>
-          <div id="question-area"></div>
-        `;
-            timerInterval = setInterval(updateTimer, 200);
-            showQuestion();
-        } else {
-            // Practice mode: infinite questions, no timer, no results, just instant feedback
-            document.getElementById('main-area').innerHTML = `
-          <div id="practice-area"></div>
-        `;
-            showPracticeQuestion();
-        }
-    }
-
-    function updateTimer() {
-        timer = Math.floor((Date.now() - startedAt)/1000);
-        const min = Math.floor(timer/60);
-        const sec = timer%60;
-        const timerEl = document.getElementById('timer-area');
-        if(timerEl) timerEl.textContent = `${min}:${sec.toString().padStart(2,'0')}`;
-    }
-
-    function showQuestion() {
-        if (current >= questions.length) {
-            clearInterval(timerInterval);
-            return showResult();
-        }
-        const q = questions[current];
-        const area = document.getElementById('question-area');
-        area.innerHTML = `
-        <div class="feedback-msg" id="feedback-msg"></div>
-        <div class="question-card">
-          <div class="question-number">Soru ${current+1} / ${questions.length}</div>
-          <div class="question-text">${q.a} × ${q.b} = ?</div>
-          <input type="number" inputmode="numeric" class="answer-input" id="answer-input" autofocus autocomplete="off" />
-          <button class="answer-btn" onclick="submitAnswer()">Cevapla</button>
-        </div>
-      `;
-        setTimeout(()=>{document.getElementById('answer-input').focus();},50);
-        document.getElementById('answer-input').addEventListener('keypress', function(e){
-            if(e.key==='Enter') submitAnswer();
-        });
-    }
-
-    function submitAnswer() {
-        const input = document.getElementById('answer-input');
-        const val = input.value.trim();
-        if(val === '') {
-            input.style.borderColor = 'var(--error)';
-            input.focus();
-            return;
-        }
-        const q = questions[current];
-        const correct = q.a * q.b;
-        const userVal = parseInt(val,10);
-        userAnswers.push({s: q, user: userVal});
-        // Feedback
-        const feedback = document.getElementById('feedback-msg');
-        if(userVal === correct) {
-            feedback.textContent = randomChoice(FEEDBACK_CORRECT);
-            feedback.className = 'feedback-msg success';
-        } else {
-            feedback.textContent = randomChoice(FEEDBACK_WRONG) + ` Doğru cevap: ${correct}`;
-            feedback.className = 'feedback-msg error';
-        }
-        // Wait then next
-        setTimeout(()=>{
-            current++;
-            showQuestion();
-        }, 900);
-    }
-
-    function showResult() {
-        let correct = 0;
-        let html = '';
-        userAnswers.forEach(({s, user}, i) => {
-            const dogru = s.a * s.b;
-            const isTrue = user === dogru;
-            if (isTrue) correct++;
-            html += `
-          <div style="margin-bottom:9px">
-            <span style="font-weight:700;color:${isTrue?'var(--success)':'var(--error)'}">
-              ${i+1}. ${s.a} × ${s.b} = ${dogru}
-            </span>
-            <span style="margin-left:8px;color:#333;">
-              (Senin cevabın: <span style="color:${isTrue?'var(--success)':'var(--error)'}">${user}</span>)
-              ${isTrue ? '✔️' : '❌'}
-            </span>
-          </div>
-        `;
-        });
-        const toplam = userAnswers.length;
-        const min = Math.floor(timer/60), sec = timer%60;
-
-        // Motivational message
-        let msg = '';
-        if(correct === toplam) msg = "Mükemmel! Hiç hata yok! 🏅";
-        else if(correct > toplam*0.7) msg = "Çok iyi! Biraz daha pratikle tam skor sende!";
-        else if(correct > toplam*0.4) msg = "Fena değil, çalışmaya devam! 💪";
-        else msg = "Daha fazla pratik iyi gelir! Denemeye devam!";
-
-        document.getElementById('main-area').innerHTML = `
-        <div class="result-card">
-          <div class="score">Doğru: ${correct} / ${toplam}</div>
-          <div class="time">Süre: ${min}:${sec.toString().padStart(2,'0')}</div>
-          <div style="margin: 12px 0 16px 0; color:var(--primary-dark); font-weight:700;">${msg}</div>
-          <hr style="margin:14px 0;">
-          ${html}
-          <button class="start-btn again-btn" onclick="startQuiz()">Tekrar Dene</button>
-        </div>
-      `;
-    }
-
-    // PRACTICE MODE
-    function showPracticeQuestion() {
-        const a = rand(MIN,MAX), b = rand(MIN,MAX);
-        const area = document.getElementById('practice-area');
-        area.innerHTML = `
-        <div class="feedback-msg" id="practice-feedback"></div>
-        <div class="question-card">
-          <div class="question-number">Pratik Modu</div>
-          <div class="question-text">${a} × ${b} = ?</div>
-          <input type="number" inputmode="numeric" class="answer-input" id="practice-answer-input" autofocus autocomplete="off" />
-          <button class="answer-btn" onclick="submitPracticeAnswer(${a},${b})">Cevapla</button>
-        </div>
-      `;
-        setTimeout(()=>{document.getElementById('practice-answer-input').focus();},50);
-        document.getElementById('practice-answer-input').addEventListener('keypress', function(e){
-            if(e.key==='Enter') submitPracticeAnswer(a,b);
-        });
-    }
-
-    function submitPracticeAnswer(a, b) {
-        const input = document.getElementById('practice-answer-input');
-        const val = input.value.trim();
-        if(val === '') {
-            input.style.borderColor = 'var(--error)';
-            input.focus();
-            return;
-        }
-        const correct = a * b;
-        const userVal = parseInt(val,10);
-        const feedback = document.getElementById('practice-feedback');
-        if(userVal === correct) {
-            feedback.textContent = randomChoice(FEEDBACK_CORRECT);
-            feedback.className = 'feedback-msg success';
-        } else {
-            feedback.textContent = randomChoice(FEEDBACK_WRONG) + ` Doğru cevap: ${correct}`;
-            feedback.className = 'feedback-msg error';
-        }
-        setTimeout(showPracticeQuestion, 900);
+    function startPractice(level) {
+        alert("Seviye " + level + " için pratik başlatılıyor!");
+        // Burada seviye bazında pratik soruları oluşturulabilir.
     }
 </script>
 </body>
