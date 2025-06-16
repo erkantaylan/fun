@@ -1,45 +1,670 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JSON Log Parser</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="../style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .upload-area {
+            border: 3px dashed #cbd5e0;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            background: white;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area.dragover {
+            border-color: #4299e1;
+            background: #ebf8ff;
+        }
+
+        .upload-area:hover {
+            border-color: #4299e1;
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            color: #a0aec0;
+            margin-bottom: 15px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            background: #4299e1;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #3182ce;
+        }
+
+        .btn-secondary {
+            background: #718096;
+        }
+
+        .btn-secondary:hover {
+            background: #4a5568;
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .filter-select {
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            min-width: 120px;
+        }
+
+        .stats {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            border-radius: 6px;
+            background: #f7fafc;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2d3748;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #718096;
+            text-transform: uppercase;
+        }
+
+        .logs-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .log-entry {
+            border-bottom: 1px solid #e2e8f0;
+            padding: 15px;
+            transition: background 0.2s ease;
+        }
+
+        .log-entry:hover {
+            background: #f7fafc;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .log-time {
+            font-size: 12px;
+            color: #718096;
+            font-family: 'Courier New', monospace;
+        }
+
+        .log-category {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .category-info {
+            background: #bee3f8;
+            color: #2b6cb0;
+        }
+
+        .category-warning {
+            background: #faf089;
+            color: #975a16;
+        }
+
+        .category-error, .category-exception {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        .category-debug {
+            background: #e6fffa;
+            color: #234e52;
+        }
+
+        .priority-high {
+            border-left: 4px solid #f56565;
+        }
+
+        .priority-medium {
+            border-left: 4px solid #ed8936;
+        }
+
+        .priority-low {
+            border-left: 4px solid #48bb78;
+        }
+
+        .log-message {
+            color: #2d3748;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .no-logs {
+            text-align: center;
+            padding: 60px 20px;
+            color: #718096;
+        }
+
+        .error-message {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 50%;
+            border-top-color: #4299e1;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .highlight {
+            background: #fef5e7;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .controls-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box, .filter-select {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>JSON Log Parser</h1>
-        <p>Bu mini proje, JSON formatındaki log dosyalarını analiz etmek için tasarlanmıştır.</p>
-        <h2>Log Dosyası Yükle</h2>
-        <input type="file" id="fileInput" accept=".json">
-        <button id="parseButton">Analiz Et</button>
-        <pre id="output"></pre>
+        <div class="header">
+            <h1>📊 JSON Log Parser</h1>
+            <p>Drop your log file here or click to browse</p>
+        </div>
+
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📁</div>
+            <p><strong>Drag and drop your log file here</strong></p>
+            <p>or</p>
+            <button class="btn" onclick="document.getElementById('fileInput').click()">
+                Choose File
+            </button>
+            <input type="file" id="fileInput" class="file-input" accept=".log,.txt,.json">
+            <p style="margin-top: 10px; font-size: 12px; color: #718096;">
+                Supports .log, .txt, and .json files
+            </p>
+        </div>
+
+        <div class="controls" id="controls" style="display: none;">
+            <div class="controls-row">
+                <input type="text" id="searchBox" class="search-box" placeholder="Search in messages...">
+                <select id="categoryFilter" class="filter-select">
+                    <option value="">All Categories</option>
+                </select>
+                <select id="priorityFilter" class="filter-select">
+                    <option value="">All Priorities</option>
+                </select>
+                <select id="sortBy" class="filter-select">
+                    <option value="time">Sort by Time (Latest First)</option>
+                    <option value="category">Sort by Category</option>
+                    <option value="priority">Sort by Priority</option>
+                </select>
+                <button class="btn btn-secondary" onclick="clearLogs()">Clear</button>
+            </div>
+        </div>
+
+        <div class="stats" id="stats" style="display: none;">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalLogs">0</div>
+                    <div class="stat-label">Total Logs</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="errorCount">0</div>
+                    <div class="stat-label">Errors</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="warningCount">0</div>
+                    <div class="stat-label">Warnings</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="infoCount">0</div>
+                    <div class="stat-label">Info</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="errorContainer"></div>
+        <div id="loadingContainer"></div>
+
+        <div class="logs-container">
+            <div id="logsContainer">
+                <div class="no-logs">
+                    No logs loaded. Please select a file to begin parsing.
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        document.getElementById('parseButton').addEventListener('click', function() {
-            const fileInput = document.getElementById('fileInput');
-            const output = document.getElementById('output');
+        let allLogs = [];
+        let filteredLogs = [];
 
-            if (fileInput.files.length === 0) {
-                output.textContent = 'Lütfen bir JSON dosyası yükleyin.';
-                return;
+        // DOM elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const controls = document.getElementById('controls');
+        const stats = document.getElementById('stats');
+        const logsContainer = document.getElementById('logsContainer');
+        const searchBox = document.getElementById('searchBox');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const priorityFilter = document.getElementById('priorityFilter');
+        const sortBy = document.getElementById('sortBy');
+        const errorContainer = document.getElementById('errorContainer');
+        const loadingContainer = document.getElementById('loadingContainer');
+
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
             }
+        });
 
-            const file = fileInput.files[0];
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        // Search and filter functionality
+        searchBox.addEventListener('input', filterLogs);
+        categoryFilter.addEventListener('change', filterLogs);
+        priorityFilter.addEventListener('change', filterLogs);
+        sortBy.addEventListener('change', () => {
+            sortLogs();
+            renderLogs();
+        });
+
+        function showLoading(show = true) {
+            if (show) {
+                loadingContainer.innerHTML = `
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Parsing log file...</p>
+                    </div>
+                `;
+            } else {
+                loadingContainer.innerHTML = '';
+            }
+        }
+
+        function showError(message) {
+            errorContainer.innerHTML = `
+                <div class="error-message">
+                    <strong>Error:</strong> ${message}
+                </div>
+            `;
+        }
+
+        function clearError() {
+            errorContainer.innerHTML = '';
+        }
+
+        function handleFile(file) {
+            clearError();
+            showLoading(true);
+
             const reader = new FileReader();
-
-            reader.onload = function(event) {
+            reader.onload = (e) => {
                 try {
-                    const json = JSON.parse(event.target.result);
-                    output.textContent = JSON.stringify(json, null, 2);
+                    parseLogFile(e.target.result);
                 } catch (error) {
-                    output.textContent = 'Geçersiz JSON dosyası: ' + error.message;
+                    showError(`Failed to parse file: ${error.message}`);
+                } finally {
+                    showLoading(false);
                 }
             };
 
+            reader.onerror = () => {
+                showError('Failed to read file');
+                showLoading(false);
+            };
+
             reader.readAsText(file);
-        });
+        }
+
+        function parseLogFile(content) {
+            const lines = content.split('\n').filter(line => line.trim());
+            const logs = [];
+            let parseErrors = 0;
+
+            lines.forEach((line, index) => {
+                try {
+                    const logEntry = JSON.parse(line.trim());
+                    
+                    // Normalize the log entry
+                    const normalizedLog = {
+                        category: logEntry.Category || logEntry.category || 'Unknown',
+                        priority: logEntry.Priority || logEntry.priority || 'Unknown',
+                        message: logEntry.Message || logEntry.message || '',
+                        time: logEntry.Time || logEntry.time || logEntry.timestamp || new Date().toISOString(),
+                        originalLine: index + 1
+                    };
+
+                    // Convert line breaks in message
+                    normalizedLog.message = normalizedLog.message
+                        .replace(/\\r\\n/g, '\n')
+                        .replace(/\\n/g, '\n')
+                        .replace(/\\r/g, '\n');
+
+                    logs.push(normalizedLog);
+                } catch (error) {
+                    parseErrors++;
+                    console.warn(`Failed to parse line ${index + 1}:`, line);
+                }
+            });
+
+            if (parseErrors > 0) {
+                showError(`Warning: ${parseErrors} lines could not be parsed as JSON`);
+            }
+
+            if (logs.length === 0) {
+                showError('No valid JSON log entries found in the file');
+                return;
+            }
+
+            allLogs = logs;
+            filteredLogs = [...allLogs];
+            
+            populateFilters();
+            updateStats();
+            sortLogs();
+            renderLogs();
+            
+            controls.style.display = 'block';
+            stats.style.display = 'block';
+        }
+
+        function populateFilters() {
+            // Populate category filter
+            const categories = [...new Set(allLogs.map(log => log.category))].sort();
+            categoryFilter.innerHTML = '<option value="">All Categories</option>';
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categoryFilter.appendChild(option);
+            });
+
+            // Populate priority filter
+            const priorities = [...new Set(allLogs.map(log => log.priority))].sort();
+            priorityFilter.innerHTML = '<option value="">All Priorities</option>';
+            priorities.forEach(priority => {
+                const option = document.createElement('option');
+                option.value = priority;
+                option.textContent = priority;
+                priorityFilter.appendChild(option);
+            });
+        }
+
+        function updateStats() {
+            const total = allLogs.length;
+            const errors = allLogs.filter(log => 
+                log.category.toLowerCase().includes('error') || 
+                log.category.toLowerCase().includes('exception')
+            ).length;
+            const warnings = allLogs.filter(log => 
+                log.category.toLowerCase().includes('warning') ||
+                log.category.toLowerCase().includes('warn')
+            ).length;
+            const info = allLogs.filter(log => 
+                log.category.toLowerCase().includes('info')
+            ).length;
+
+            document.getElementById('totalLogs').textContent = total;
+            document.getElementById('errorCount').textContent = errors;
+            document.getElementById('warningCount').textContent = warnings;
+            document.getElementById('infoCount').textContent = info;
+        }
+
+        function filterLogs() {
+            const searchTerm = searchBox.value.toLowerCase();
+            const categoryValue = categoryFilter.value;
+            const priorityValue = priorityFilter.value;
+
+            filteredLogs = allLogs.filter(log => {
+                const matchesSearch = searchTerm === '' || 
+                    log.message.toLowerCase().includes(searchTerm);
+                const matchesCategory = categoryValue === '' || 
+                    log.category === categoryValue;
+                const matchesPriority = priorityValue === '' || 
+                    log.priority === priorityValue;
+
+                return matchesSearch && matchesCategory && matchesPriority;
+            });
+
+            sortLogs();
+            renderLogs();
+        }
+
+        function sortLogs() {
+            const sortValue = sortBy.value;
+
+            filteredLogs.sort((a, b) => {
+                switch (sortValue) {
+                    case 'category':
+                        return a.category.localeCompare(b.category);
+                    case 'priority':
+                        const priorityOrder = { 'High': 3, 'Medium': 2, 'Low': 1 };
+                        return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
+                    case 'time':
+                    default:
+                        // Changed: Reverse the sorting to show latest entries first
+                        return new Date(b.time) - new Date(a.time);
+                }
+            });
+        }
+
+        function renderLogs() {
+            if (filteredLogs.length === 0) {
+                logsContainer.innerHTML = `
+                    <div class="no-logs">
+                        ${allLogs.length === 0 ? 
+                            'No logs loaded. Please select a file to begin parsing.' : 
+                            'No logs match the current filters.'}
+                    </div>
+                `;
+                return;
+            }
+
+            const searchTerm = searchBox.value.toLowerCase();
+            
+            logsContainer.innerHTML = filteredLogs.map(log => {
+                const categoryClass = `category-${log.category.toLowerCase()}`;
+                const priorityClass = `priority-${log.priority.toLowerCase()}`;
+                
+                let message = escapeHtml(log.message);
+                
+                // Highlight search terms
+                if (searchTerm) {
+                    const regex = new RegExp(`(${escapeRegex(searchTerm)})`, 'gi');
+                    message = message.replace(regex, '<span class="highlight">$1</span>');
+                }
+
+                return `
+                    <div class="log-entry ${priorityClass}">
+                        <div class="log-header">
+                            <span class="log-time">${formatTime(log.time)}</span>
+                            <span class="log-category ${categoryClass}">${log.category}</span>
+                            <span class="log-category" style="background: #e2e8f0; color: #4a5568;">${log.priority}</span>
+                        </div>
+                        <div class="log-message">${message}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function formatTime(timeString) {
+            try {
+                const date = new Date(timeString);
+                return date.toLocaleString();
+            } catch {
+                return timeString;
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function escapeRegex(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function clearLogs() {
+            allLogs = [];
+            filteredLogs = [];
+            logsContainer.innerHTML = `
+                <div class="no-logs">
+                    No logs loaded. Please select a file to begin parsing.
+                </div>
+            `;
+            controls.style.display = 'none';
+            stats.style.display = 'none';
+            clearError();
+            searchBox.value = '';
+            categoryFilter.selectedIndex = 0;
+            priorityFilter.selectedIndex = 0;
+            sortBy.selectedIndex = 0;
+        }
     </script>
 </body>
 </html>
