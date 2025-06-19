@@ -2,409 +2,735 @@
 <html class="light-mode" lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Mini Projelerim</title>
+    <title>Mini Projelerim - Liquid Glass</title>
     <meta content="width=device-width, initial-scale=1" name="viewport">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            /* Light theme variables */
-            --bg-color: #e6eef8;
-            --shadow-dark: rgba(163, 177, 198, 0.7);
-            --shadow-light: rgba(255, 255, 255, 0.9);
-            --primary-color: #3960c3;
-            --text-color: #2d4263;
-            --icon-bg: #e2eaf7;
+            /* Light theme - Clean White & Gray Glass */
+            --bg-primary: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+            --bg-secondary: rgba(255, 255, 255, 0.2);
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --glass-shadow: 0 8px 32px rgba(148, 163, 184, 0.2);
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --accent-color: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.3);
+            --blur-amount: 16px;
         }
 
-        /* Dark theme variables */
         .dark-mode:root {
-            --bg-color: #000000;
-            --shadow-dark: rgba(0, 0, 0, 0.8);
-            --shadow-light: rgba(20, 20, 20, 0.9);
-            --primary-color: #000000;
-            --text-color: #000000;
-            --icon-bg: #000000;
+            /* Dark theme - Deep Space Glass */
+            --bg-primary: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            --bg-secondary: rgba(0, 0, 0, 0.3);
+            --glass-bg: rgba(20, 20, 40, 0.25);
+            --glass-border: rgba(100, 100, 255, 0.1);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+            --text-primary: rgba(255, 255, 255, 0.9);
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --accent-color: #ff6b6b;
+            --accent-glow: rgba(255, 107, 107, 0.3);
+            --blur-amount: 20px;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
         }
 
         body {
-            background-color: var(--bg-color);
-            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            font-family: 'Inter', sans-serif;
             min-height: 100vh;
-            padding: 20px 10px;
+            padding: 20px;
             position: relative;
+            overflow-x: hidden;
         }
 
-        .container {
-            max-width: 540px;
-            margin: 20px auto;
-            background-color: var(--bg-color);
-            border-radius: 30px;
-            padding: 35px 25px;
-            box-shadow: 20px 20px 35px var(--shadow-dark),
-            -20px -20px 35px var(--shadow-light);
-            position: relative;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-            padding: 25px;
-            border-radius: 20px;
-            background-color: var(--bg-color);
-            box-shadow: inset 8px 8px 15px var(--shadow-dark),
-            inset -8px -8px 15px var(--shadow-light);
-            position: relative;
-        }
-
-        h1 {
-            font-size: 2rem;
-            letter-spacing: 1px;
-            font-weight: 700;
-            color: var(--text-color);
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 3px var(--shadow-light);
-        }
-
-        .subtitle {
-            font-size: 1rem;
-            color: #6c757d;
-            font-weight: 500;
-        }
-
-        .projects-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 25px;
-            width: 100%;
-            list-style: none;
-            padding: 15px 5px;
-        }
-
-        .project-card {
-            position: relative;
-            height: 90px;
-            border-radius: 20px;
-            background-color: var(--bg-color);
-            box-shadow: 12px 12px 24px var(--shadow-dark),
-            -12px -12px 24px var(--shadow-light);
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
-
-        .project-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .project-card:active {
-            transform: scale(0.97);
-            box-shadow: 6px 6px 12px var(--shadow-dark),
-            -6px -6px 12px var(--shadow-light),
-            inset 2px 2px 5px var(--shadow-dark),
-            inset -2px -2px 5px var(--shadow-light);
-        }
-
-        .project-link {
-            display: flex;
-            align-items: center;
-            height: 100%;
-            width: 100%;
-            padding: 0 25px;
-            color: var(--text-color);
-            text-decoration: none;
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-
-        .project-icon {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 50px;
-            height: 50px;
-            border-radius: 15px;
-            background-color: var(--icon-bg);
-            margin-right: 20px;
-            color: var(--primary-color);
-            box-shadow: 5px 5px 10px var(--shadow-dark),
-            -5px -5px 10px var(--shadow-light);
-            flex-shrink: 0;
-        }
-
-        .project-icon i {
-            font-size: 1.3rem;
-        }
-
-        .project-name {
-            flex-grow: 1;
-        }
-
-        .chevron {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 36px;
-            height: 36px;
-            border-radius: 12px;
-            background-color: var(--icon-bg);
-            box-shadow: 4px 4px 8px var(--shadow-dark),
-            -4px -4px 8px var(--shadow-light);
-            color: var(--primary-color);
-            flex-shrink: 0;
-        }
-
-        /* Theme Switcher Styles */
-        .theme-switcher {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 100;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background-color: #f8f8f8;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-        }
-
-        .theme-switcher:hover {
-            transform: rotate(15deg);
-        }
-
-        .theme-icon {
-            font-size: 24px;
-            color: #333;
-        }
-
-        /* Special Dark Mode Styles */
-        .dark-mode .theme-switcher {
-            background-color: #000;
-            box-shadow: 0 0 0 5px rgba(255, 255, 0, 0.3),
-            0 0 20px 5px rgba(255, 200, 0, 0.6),
-            0 0 40px 15px rgba(255, 200, 0, 0.3);
-        }
-
-        .dark-mode .theme-icon {
-            color: #ffeb3b;
-            text-shadow: 0 0 10px rgba(255, 235, 59, 0.8);
-            animation: flicker 2s infinite alternate;
-        }
-
-        /* Light Bulb Animation */
-        @keyframes flicker {
-            0%, 18%, 22%, 25%, 53%, 57%, 100% {
-                text-shadow: 0 0 10px rgba(255, 235, 59, 0.8),
-                0 0 20px rgba(255, 235, 59, 0.8);
-            }
-            20%, 24%, 55% {
-                text-shadow: none;
-            }
-        }
-
-        /* Spotlight effect in dark mode */
-        .dark-mode::after {
+        /* Animated background particles */
+        body::before {
             content: '';
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none;
-            background: radial-gradient(
-                    circle 150px at var(--mouse-x, 50%) var(--mouse-y, 50%),
-                    rgba(255, 230, 0, 0.15),
-                    transparent 80%
-            );
-            z-index: 999;
-            mix-blend-mode: overlay;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(203, 213, 225, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(241, 245, 249, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(226, 232, 240, 0.4) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+            z-index: -1;
         }
 
-        /* Date Display */
-        .date-display {
+        .dark-mode body::before {
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-30px) rotate(0.5deg); }
+            66% { transform: translateY(15px) rotate(-0.5deg); }
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Liquid Glass Header */
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 30px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--blur-amount));
+            -webkit-backdrop-filter: blur(var(--blur-amount));
+            border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
             position: absolute;
-            bottom: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.8rem;
-            color: var(--text-color);
-            opacity: 0.7;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: shimmer 3s infinite;
         }
 
-        @media (min-width: 480px) {
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, var(--accent-color), var(--text-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px var(--accent-glow);
+            position: relative;
+            z-index: 1;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Floating orb decoration */
+        .floating-orb {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--accent-color), transparent);
+            opacity: 0.2;
+            animation: orbit 15s linear infinite;
+            top: 20px;
+            right: 20px;
+        }
+
+        @keyframes orbit {
+            from { transform: rotate(0deg) translateX(50px) rotate(0deg); }
+            to { transform: rotate(360deg) translateX(50px) rotate(-360deg); }
+        }
+
+        /* Projects Grid */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            list-style: none;
+            padding: 0;
+        }
+
+        .project-card {
+            position: relative;
+            height: 100px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--blur-amount));
+            -webkit-backdrop-filter: blur(var(--blur-amount));
+            border-radius: 25px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 25px;
+        }
+
+        .project-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 
+                var(--glass-shadow),
+                0 20px 40px rgba(148, 163, 184, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.2);
+        }
+
+        .dark-mode .project-card:hover {
+            box-shadow: 
+                var(--glass-shadow),
+                0 20px 40px rgba(0, 0, 0, 0.2),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+
+        .project-card:hover::before {
+            opacity: 1;
+        }
+
+        .project-card:active {
+            transform: translateY(-4px) scale(0.98);
+        }
+
+        .project-link {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            padding: 0 25px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Liquid Glass Icon */
+        .project-icon {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 60px;
+            height: 60px;
+            border-radius: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            margin-right: 20px;
+            color: var(--accent-color);
+            box-shadow: 
+                inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                0 4px 8px rgba(148, 163, 184, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dark-mode .project-icon {
+            box-shadow: 
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .project-icon::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, var(--accent-color), transparent);
+            opacity: 0;
+            animation: rotate 2s linear infinite;
+            transition: opacity 0.3s ease;
+        }
+
+        .project-card:hover .project-icon::before {
+            opacity: 0.3;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .project-icon i {
+            font-size: 1.4rem;
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0 0 8px var(--accent-glow));
+        }
+
+        .project-name {
+            flex-grow: 1;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        /* Animated Chevron */
+        .chevron {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 15px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--glass-border);
+            color: var(--accent-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card:hover .chevron {
+            transform: translateX(5px);
+            background: var(--accent-color);
+            color: white;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        /* Futuristic Theme Switcher */
+        .theme-switcher {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            z-index: 1000;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--blur-amount));
+            border: 2px solid var(--glass-border);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: var(--glass-shadow);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-switcher::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: conic-gradient(from 0deg, var(--accent-color), transparent, var(--accent-color));
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            animation: rotate 3s linear infinite;
+        }
+
+        .theme-switcher:hover {
+            transform: scale(1.1) rotate(180deg);
+            box-shadow: 
+                var(--glass-shadow),
+                0 0 30px var(--accent-glow);
+        }
+
+        .theme-switcher:hover::before {
+            opacity: 0.3;
+        }
+
+        .theme-icon {
+            font-size: 28px;
+            color: var(--accent-color);
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 0 10px var(--accent-glow));
+        }
+
+        /* Dark mode special effects */
+        .dark-mode .theme-switcher {
+            box-shadow: 
+                var(--glass-shadow),
+                0 0 20px var(--accent-color),
+                inset 0 0 20px rgba(255, 107, 107, 0.1);
+        }
+
+        .dark-mode .theme-icon {
+            animation: pulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { 
+                filter: drop-shadow(0 0 10px var(--accent-glow));
+                transform: scale(1);
+            }
+            to { 
+                filter: drop-shadow(0 0 20px var(--accent-glow));
+                transform: scale(1.05);
+            }
+        }
+
+        /* Liquid cursor trail effect */
+        .cursor-trail {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--accent-color), transparent);
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Responsive Design */
+        @media (min-width: 768px) {
             .container {
-                margin: 40px auto;
-                padding: 45px 35px;
-                border-radius: 40px;
+                max-width: 700px;
+            }
+
+            .projects-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 25px;
             }
 
             h1 {
-                font-size: 2.2rem;
+                font-size: 3rem;
             }
 
             .project-card {
-                height: 100px;
+                height: 120px;
             }
 
             .project-icon {
-                width: 56px;
-                height: 56px;
-            }
-
-            .theme-switcher {
                 width: 70px;
                 height: 70px;
             }
+        }
+
+        @media (max-width: 480px) {
+            .theme-switcher {
+                width: 60px;
+                height: 60px;
+                top: 20px;
+                right: 20px;
+            }
 
             .theme-icon {
-                font-size: 30px;
+                font-size: 20px;
+            }
+
+            header {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            opacity: 0;
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
     </style>
 </head>
 <body>
-<div class="theme-switcher" id="themeSwitcher">
-    <i class="fas fa-lightbulb theme-icon" id="themeIcon"></i>
-</div>
+    <!-- Cursor Trail Elements -->
+    <div class="cursor-trail" id="trail1"></div>
+    <div class="cursor-trail" id="trail2"></div>
+    <div class="cursor-trail" id="trail3"></div>
 
-<div class="container">
-    <header>
-        <h1>Mini Projelerim</h1>
-        <!--        <div class="subtitle">Eğitim ve araçlar koleksiyonu</div>-->
-    </header>
+    <div class="theme-switcher" id="themeSwitcher">
+        <i class="fas fa-moon theme-icon" id="themeIcon"></i>
+    </div>
 
-    <ul class="projects-grid">
-        <li class="project-card">
-            <a class="project-link" href="./mem-city-plate/plaka-ezber.html">
-                <div class="project-icon">
-                    <i class="fas fa-car"></i>
-                </div>
-                <span class="project-name">Plaka Kodları Ezber</span>
-                <div class="chevron">
-                    <i class="fas fa-chevron-right"></i>
-                </div>
-            </a>
-        </li>
-        <li class="project-card">
-            <a class="project-link" href="./math/times-table.html">
-                <div class="project-icon">
-                    <i class="fas fa-calculator"></i>
-                </div>
-                <span class="project-name">Çarpım Tablosu</span>
-                <div class="chevron">
-                    <i class="fas fa-chevron-right"></i>
-                </div>
-            </a>
-        </li>
-        <li class="project-card">
-            <a class="project-link" href="./math/subtraction-practice.html">
-                <div class="project-icon">
-                    <i class="fas fa-minus"></i>
-                </div>
-                <span class="project-name">Çıkarma Pratiği</span>
-                <div class="chevron">
-                    <i class="fas fa-chevron-right"></i>
-                </div>
-            </a>
-        </li>
-        <li class="project-card">
-            <a class="project-link" href="./turkey-map/turkey-map.html">
-                <div class="project-icon">
-                    <i class="fas fa-map"></i>
-                </div>
-                <span class="project-name">Türkiye Haritası</span>
-                <div class="chevron">
-                    <i class="fas fa-chevron-right"></i>
-                </div>
-            </a>
-        </li>
-        <li class="project-card">
-            <a class="project-link" href="./other/med-log-parser.html">
-                <div class="project-icon">
-                    <i class="fas fa-file-code"></i>
-                </div>
-                <span class="project-name">Json Log Parser</span>
-                <div class="chevron">
-                    <i class="fas fa-chevron-right"></i>
-                </div>
-            </a>
-        </li>
-        <li class="project-card">
-            <a class="project-link" href="./other/dizel-filtre-iptal.html">
-                <div class="project-icon">
-                    <i class="fas fa-filter"></i>
-                </div>
-                <span class="project-name">Dizel Araç Filtre İptali</span>
-                <div class="chevron">
-                    <i class="fas fa-chevron-right"></i>
-                </div>
-            </a>
-        </li>
-        <li class="project-card">
-            <a class="project-link" href="./other/html-preview.html">
-                <div class="project-icon">
-                    <i class="fas fa-code"></i>
-                </div>
-                <span class="project-name">HTML Önizleme</span>
-                <div class="chevron">
-                    <i class="fas fa-chevron-right"></i>
-                </div>
-            </a>
-        </li>
-    </ul>
+    <div class="container">
+        <header class="loading">
+            <div class="floating-orb"></div>
+            <h1>Mini Projelerim</h1>
+            <div class="subtitle">Liquid Glass Collection</div>
+        </header>
 
-    <div class="date-display" id="dateDisplay">2025-06-19 09:07:05 UTC</div>
-</div>
+        <ul class="projects-grid">
+            <li class="project-card loading" style="animation-delay: 0.1s">
+                <a class="project-link" href="./mem-city-plate/plaka-ezber.html">
+                    <div class="project-icon">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <span class="project-name">Plaka Kodları Ezber</span>
+                    <div class="chevron">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </a>
+            </li>
+            
+            <li class="project-card loading" style="animation-delay: 0.2s">
+                <a class="project-link" href="./math/times-table.html">
+                    <div class="project-icon">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <span class="project-name">Çarpım Tablosu</span>
+                    <div class="chevron">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </a>
+            </li>
+            
+            <li class="project-card loading" style="animation-delay: 0.3s">
+                <a class="project-link" href="./math/subtraction-practice.html">
+                    <div class="project-icon">
+                        <i class="fas fa-minus"></i>
+                    </div>
+                    <span class="project-name">Çıkarma Pratiği</span>
+                    <div class="chevron">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </a>
+            </li>
+            
+            <li class="project-card loading" style="animation-delay: 0.4s">
+                <a class="project-link" href="./turkey-map/turkey-map.html">
+                    <div class="project-icon">
+                        <i class="fas fa-map"></i>
+                    </div>
+                    <span class="project-name">Türkiye Haritası</span>
+                    <div class="chevron">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </a>
+            </li>
+            
+            <li class="project-card loading" style="animation-delay: 0.5s">
+                <a class="project-link" href="./other/med-log-parser.html">
+                    <div class="project-icon">
+                        <i class="fas fa-file-code"></i>
+                    </div>
+                    <span class="project-name">Json Log Parser</span>
+                    <div class="chevron">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </a>
+            </li>
+            
+            <li class="project-card loading" style="animation-delay: 0.6s">
+                <a class="project-link" href="./other/dizel-filtre-iptal.html">
+                    <div class="project-icon">
+                        <i class="fas fa-filter"></i>
+                    </div>
+                    <span class="project-name">Dizel Araç Filtre İptali</span>
+                    <div class="chevron">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </a>
+            </li>
+            
+            <li class="project-card loading" style="animation-delay: 0.7s">
+                <a class="project-link" href="./other/html-preview.html">
+                    <div class="project-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <span class="project-name">HTML Önizleme</span>
+                    <div class="chevron">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </a>
+            </li>
+        </ul>
+    </div>
 
-<script>
-    // Theme Switcher Functionality
-    const themeSwitcher = document.getElementById('themeSwitcher');
-    const themeIcon = document.getElementById('themeIcon');
-    const html = document.documentElement;
-    const dateDisplay = document.getElementById('dateDisplay');
+    <script>
+        // Enhanced Theme Switcher with Liquid Effects
+        const themeSwitcher = document.getElementById('themeSwitcher');
+        const themeIcon = document.getElementById('themeIcon');
+        const html = document.documentElement;
 
-    // Set current user login
-    const currentUser = 'current-user';
+        // Cursor trail effect
+        const trails = [
+            document.getElementById('trail1'),
+            document.getElementById('trail2'),
+            document.getElementById('trail3')
+        ];
 
-    // Initialize mouse position tracking for spotlight effect
-    let mouseX = 0;
-    let mouseY = 0;
+        let mouseX = 0;
+        let mouseY = 0;
+        let trailPositions = [
+            { x: 0, y: 0 },
+            { x: 0, y: 0 },
+            { x: 0, y: 0 }
+        ];
 
-    document.addEventListener('mousemove', (e) => {
-        if (html.classList.contains('dark-mode')) {
+        // Update cursor trail
+        document.addEventListener('mousemove', (e) => {
             mouseX = e.clientX;
             mouseY = e.clientY;
-            document.documentElement.style.setProperty('--mouse-x', mouseX + 'px');
-            document.documentElement.style.setProperty('--mouse-y', mouseY + 'px');
+        });
+
+        function updateTrails() {
+            // Update trail positions with delay
+            trailPositions[0].x += (mouseX - trailPositions[0].x) * 0.3;
+            trailPositions[0].y += (mouseY - trailPositions[0].y) * 0.3;
+            
+            trailPositions[1].x += (trailPositions[0].x - trailPositions[1].x) * 0.3;
+            trailPositions[1].y += (trailPositions[0].y - trailPositions[1].y) * 0.3;
+            
+            trailPositions[2].x += (trailPositions[1].x - trailPositions[2].x) * 0.3;
+            trailPositions[2].y += (trailPositions[1].y - trailPositions[2].y) * 0.3;
+
+            // Apply positions
+            trails.forEach((trail, index) => {
+                trail.style.left = trailPositions[index].x - 10 + 'px';
+                trail.style.top = trailPositions[index].y - 10 + 'px';
+                trail.style.opacity = 0.8 - (index * 0.2);
+                trail.style.transform = `scale(${1 - (index * 0.2)})`;
+            });
+
+            requestAnimationFrame(updateTrails);
         }
-    });
 
-    // Theme toggle function
-    themeSwitcher.addEventListener('click', () => {
-        html.classList.toggle('dark-mode');
+        // Start trail animation
+        updateTrails();
 
-        if (html.classList.contains('dark-mode')) {
-            themeIcon.classList.remove('fa-lightbulb');
-            themeIcon.classList.add('fa-lightbulb');
+        // Show trails on mouse move
+        document.addEventListener('mousemove', () => {
+            trails.forEach(trail => {
+                trail.style.opacity = '0.6';
+            });
+        });
 
-            // Track initial mouse position for spotlight
-            document.documentElement.style.setProperty('--mouse-x', mouseX + 'px');
-            document.documentElement.style.setProperty('--mouse-y', mouseY + 'px');
-        } else {
-            themeIcon.classList.remove('fa-lightbulb');
-            themeIcon.classList.add('fa-lightbulb');
+        // Hide trails when mouse stops
+        let mouseTimeout;
+        document.addEventListener('mousemove', () => {
+            clearTimeout(mouseTimeout);
+            mouseTimeout = setTimeout(() => {
+                trails.forEach(trail => {
+                    trail.style.opacity = '0';
+                });
+            }, 1000);
+        });
+
+        // Theme toggle with enhanced effects
+        themeSwitcher.addEventListener('click', () => {
+            html.classList.toggle('dark-mode');
+            
+            if (html.classList.contains('dark-mode')) {
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            } else {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+
+            // Add ripple effect
+            const ripple = document.createElement('div');
+            ripple.style.position = 'absolute';
+            ripple.style.width = '200px';
+            ripple.style.height = '200px';
+            ripple.style.borderRadius = '50%';
+            ripple.style.background = 'radial-gradient(circle, rgba(255,255,255,0.3), transparent)';
+            ripple.style.top = '50%';
+            ripple.style.left = '50%';
+            ripple.style.transform = 'translate(-50%, -50%) scale(0)';
+            ripple.style.animation = 'ripple 0.6s ease-out';
+            ripple.style.pointerEvents = 'none';
+            
+            themeSwitcher.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+
+        // Add ripple animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: translate(-50%, -50%) scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Add click sound effect (optional)
+        function playClickSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.1);
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.1);
         }
-    });
-</script>
+
+        // Add sound to project cards
+        document.querySelectorAll('.project-card').forEach(card => {
+            card.addEventListener('click', () => {
+                try {
+                    playClickSound();
+                } catch (e) {
+                    // Ignore audio errors
+                }
+            });
+        });
+
+        // Parallax effect for floating elements
+        document.addEventListener('mousemove', (e) => {
+            const mouseXPercentage = e.clientX / window.innerWidth;
+            const mouseYPercentage = e.clientY / window.innerHeight;
+            
+            const floatingOrb = document.querySelector('.floating-orb');
+            if (floatingOrb) {
+                const moveX = (mouseXPercentage - 0.5) * 20;
+                const moveY = (mouseYPercentage - 0.5) * 20;
+                floatingOrb.style.transform = `translate(${moveX}px, ${moveY}px)`;
+            }
+        });
+    </script>
 </body>
 </html>
