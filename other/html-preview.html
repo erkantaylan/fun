@@ -1,0 +1,130 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HTML Previewer</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #sidebar {
+            width: 300px;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+        #drop-zone {
+            flex: 0 0 auto;
+            border: 2px dashed #aaa;
+            border-radius: 4px;
+            padding: 16px;
+            text-align: center;
+            color: #666;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+        #drop-zone.hover {
+            background: #f0f0f0;
+            border-color: #888;
+        }
+        #html-input {
+            flex: 1 1 auto;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: none;
+            font-family: monospace;
+            margin-bottom: 12px;
+        }
+        #preview {
+            flex: 1 1 auto;
+            border: none;
+            width: calc(100% - 300px);
+        }
+        button {
+            padding: 6px 12px;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+<div id="sidebar">
+    <div id="drop-zone">Drag & Drop HTML file here<br>or click to browse</div>
+    <input type="file" id="file-input" style="display:none">
+    <textarea id="html-input" placeholder="Or paste your HTML here..."></textarea>
+    <button id="render-btn">Render HTML</button>
+</div>
+<iframe id="preview" sandbox="allow-scripts"></iframe>
+
+<script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const htmlInput = document.getElementById('html-input');
+    const renderBtn = document.getElementById('render-btn');
+    const preview = document.getElementById('preview');
+
+    // Load text into preview iframe
+    function render(html) {
+        preview.srcdoc = html;
+    }
+
+    // Handle file reading (treat any file as HTML)
+    function handleFile(file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            htmlInput.value = e.target.result;
+            render(e.target.result);
+        };
+        reader.readAsText(file);
+    }
+
+    // Drag & Drop events
+    dropZone.addEventListener('dragover', e => {
+        e.preventDefault();
+        dropZone.classList.add('hover');
+    });
+    dropZone.addEventListener('dragleave', e => {
+        dropZone.classList.remove('hover');
+    });
+    dropZone.addEventListener('drop', e => {
+        e.preventDefault();
+        dropZone.classList.remove('hover');
+        if (e.dataTransfer.files.length) {
+            handleFile(e.dataTransfer.files[0]);
+        }
+    });
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    // File input browse
+    fileInput.addEventListener('change', e => {
+        if (e.target.files.length) {
+            handleFile(e.target.files[0]);
+        }
+    });
+
+    // Paste event
+    htmlInput.addEventListener('paste', () => {
+        setTimeout(() => render(htmlInput.value), 0);
+    });
+
+    // Render on button click
+    renderBtn.addEventListener('click', () => render(htmlInput.value));
+
+    // Initial placeholder
+    render(`<!DOCTYPE html>
+<html>
+  <head><meta charset="UTF-8"><title>Preview</title></head>
+  <body><p>Drop an HTML file or paste HTML here to preview.</p></body>
+</html>`);
+</script>
+</body>
+</html>
