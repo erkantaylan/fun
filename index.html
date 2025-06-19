@@ -1,84 +1,410 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html class="light-mode" lang="tr">
 <head>
     <meta charset="UTF-8">
     <title>Mini Projelerim</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="style.css">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            background: linear-gradient(135deg, #eef6ff 0%, #f0f4f9 100%);
-            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+        :root {
+            /* Light theme variables */
+            --bg-color: #e6eef8;
+            --shadow-dark: rgba(163, 177, 198, 0.7);
+            --shadow-light: rgba(255, 255, 255, 0.9);
+            --primary-color: #3960c3;
+            --text-color: #2d4263;
+            --icon-bg: #e2eaf7;
+        }
+
+        /* Dark theme variables */
+        .dark-mode:root {
+            --bg-color: #000000;
+            --shadow-dark: rgba(0, 0, 0, 0.8);
+            --shadow-light: rgba(20, 20, 20, 0.9);
+            --primary-color: #000000;
+            --text-color: #000000;
+            --icon-bg: #000000;
+        }
+
+        * {
             margin: 0;
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 480px;
-            margin: 64px auto;
-            background: #fff;
-            border-radius: 18px;
-            box-shadow: 0 6px 36px rgba(0,32,64,0.07);
-            padding: 36px 28px 32px 28px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        h1 {
-            font-size: 2.2rem;
-            letter-spacing: 1px;
-            font-weight: 800;
-            margin-bottom: 30px;
-            color: #224477;
-        }
-        ul {
-            list-style: none;
             padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            padding: 20px 10px;
+            position: relative;
+        }
+
+        .container {
+            max-width: 540px;
+            margin: 20px auto;
+            background-color: var(--bg-color);
+            border-radius: 30px;
+            padding: 35px 25px;
+            box-shadow: 20px 20px 35px var(--shadow-dark),
+            -20px -20px 35px var(--shadow-light);
+            position: relative;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 25px;
+            border-radius: 20px;
+            background-color: var(--bg-color);
+            box-shadow: inset 8px 8px 15px var(--shadow-dark),
+            inset -8px -8px 15px var(--shadow-light);
+            position: relative;
+        }
+
+        h1 {
+            font-size: 2rem;
+            letter-spacing: 1px;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 3px var(--shadow-light);
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
             width: 100%;
+            list-style: none;
+            padding: 15px 5px;
         }
-        li {
-            margin-bottom: 18px;
+
+        .project-card {
+            position: relative;
+            height: 90px;
+            border-radius: 20px;
+            background-color: var(--bg-color);
+            box-shadow: 12px 12px 24px var(--shadow-dark),
+            -12px -12px 24px var(--shadow-light);
+            transition: all 0.3s ease;
+            overflow: hidden;
         }
-        a.project-link {
-            display: block;
-            padding: 18px 24px;
-            border-radius: 12px;
-            background: linear-gradient(90deg,#e0e9ff 40%, #b3cffb 100%);
-            color: #183c6b;
+
+        .project-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .project-card:active {
+            transform: scale(0.97);
+            box-shadow: 6px 6px 12px var(--shadow-dark),
+            -6px -6px 12px var(--shadow-light),
+            inset 2px 2px 5px var(--shadow-dark),
+            inset -2px -2px 5px var(--shadow-light);
+        }
+
+        .project-link {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+            padding: 0 25px;
+            color: var(--text-color);
             text-decoration: none;
-            font-size: 1.16rem;
+            font-size: 1.1rem;
             font-weight: 600;
-            box-shadow: 0 2px 12px rgba(50,100,200,0.05);
-            transition: background 0.16s, transform 0.09s, box-shadow 0.13s;
-            border-left: 5px solid #3960c3;
         }
-        a.project-link:hover {
-            background: linear-gradient(90deg,#d1e1fc 40%, #a2bbef 100%);
-            color: #1a2d45;
-            transform: translateY(-2px) scale(1.018);
-            box-shadow: 0 6px 18px rgba(44,82,180,0.09);
+
+        .project-icon {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
+            background-color: var(--icon-bg);
+            margin-right: 20px;
+            color: var(--primary-color);
+            box-shadow: 5px 5px 10px var(--shadow-dark),
+            -5px -5px 10px var(--shadow-light);
+            flex-shrink: 0;
         }
-        @media (max-width: 600px) {
-            .container {
-                margin: 20px 6px;
-                padding: 18px 5vw 16px 5vw;
+
+        .project-icon i {
+            font-size: 1.3rem;
+        }
+
+        .project-name {
+            flex-grow: 1;
+        }
+
+        .chevron {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            background-color: var(--icon-bg);
+            box-shadow: 4px 4px 8px var(--shadow-dark),
+            -4px -4px 8px var(--shadow-light);
+            color: var(--primary-color);
+            flex-shrink: 0;
+        }
+
+        /* Theme Switcher Styles */
+        .theme-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #f8f8f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .theme-switcher:hover {
+            transform: rotate(15deg);
+        }
+
+        .theme-icon {
+            font-size: 24px;
+            color: #333;
+        }
+
+        /* Special Dark Mode Styles */
+        .dark-mode .theme-switcher {
+            background-color: #000;
+            box-shadow: 0 0 0 5px rgba(255, 255, 0, 0.3),
+            0 0 20px 5px rgba(255, 200, 0, 0.6),
+            0 0 40px 15px rgba(255, 200, 0, 0.3);
+        }
+
+        .dark-mode .theme-icon {
+            color: #ffeb3b;
+            text-shadow: 0 0 10px rgba(255, 235, 59, 0.8);
+            animation: flicker 2s infinite alternate;
+        }
+
+        /* Light Bulb Animation */
+        @keyframes flicker {
+            0%, 18%, 22%, 25%, 53%, 57%, 100% {
+                text-shadow: 0 0 10px rgba(255, 235, 59, 0.8),
+                0 0 20px rgba(255, 235, 59, 0.8);
             }
-            h1 { font-size: 1.28rem; }
-            a.project-link { font-size: 1rem; padding: 14px 10px;}
+            20%, 24%, 55% {
+                text-shadow: none;
+            }
+        }
+
+        /* Spotlight effect in dark mode */
+        .dark-mode::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(
+                    circle 150px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+                    rgba(255, 230, 0, 0.15),
+                    transparent 80%
+            );
+            z-index: 999;
+            mix-blend-mode: overlay;
+        }
+
+        /* Date Display */
+        .date-display {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        @media (min-width: 480px) {
+            .container {
+                margin: 40px auto;
+                padding: 45px 35px;
+                border-radius: 40px;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .project-card {
+                height: 100px;
+            }
+
+            .project-icon {
+                width: 56px;
+                height: 56px;
+            }
+
+            .theme-switcher {
+                width: 70px;
+                height: 70px;
+            }
+
+            .theme-icon {
+                font-size: 30px;
+            }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>Mini Projelerim</h1>
-    <ul>
-        <li><a class="project-link" href="./mem-city-plate/plaka-ezber.html">Plaka Kodları Ezber</a></li>
-        <li><a class="project-link" href="./math/times-table.html">Çarpım Tablosu</a></li>
-        <li><a class="project-link" href="./math/subtraction-practice.html">Çıkarma Pratiği</a></li>
-        <li><a class="project-link" href="./turkey-map/turkey-map.html">Türkiye Haritası</a></li>
-        <li><a class="project-link" href="./other/med-log-parser.html">Json Log Parser</a></li>
-        <li><a class="project-link" href="./other/dizel-filtre-iptal.html">Dizel Araç Filtre İptali</a></li>
-        <li><a class="project-link" href="./other/html-preview.html">HTML Önizleme</a></li>
-    </ul>
+<div class="theme-switcher" id="themeSwitcher">
+    <i class="fas fa-lightbulb theme-icon" id="themeIcon"></i>
 </div>
+
+<div class="container">
+    <header>
+        <h1>Mini Projelerim</h1>
+        <!--        <div class="subtitle">Eğitim ve araçlar koleksiyonu</div>-->
+    </header>
+
+    <ul class="projects-grid">
+        <li class="project-card">
+            <a class="project-link" href="./mem-city-plate/plaka-ezber.html">
+                <div class="project-icon">
+                    <i class="fas fa-car"></i>
+                </div>
+                <span class="project-name">Plaka Kodları Ezber</span>
+                <div class="chevron">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </a>
+        </li>
+        <li class="project-card">
+            <a class="project-link" href="./math/times-table.html">
+                <div class="project-icon">
+                    <i class="fas fa-calculator"></i>
+                </div>
+                <span class="project-name">Çarpım Tablosu</span>
+                <div class="chevron">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </a>
+        </li>
+        <li class="project-card">
+            <a class="project-link" href="./math/subtraction-practice.html">
+                <div class="project-icon">
+                    <i class="fas fa-minus"></i>
+                </div>
+                <span class="project-name">Çıkarma Pratiği</span>
+                <div class="chevron">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </a>
+        </li>
+        <li class="project-card">
+            <a class="project-link" href="./turkey-map/turkey-map.html">
+                <div class="project-icon">
+                    <i class="fas fa-map"></i>
+                </div>
+                <span class="project-name">Türkiye Haritası</span>
+                <div class="chevron">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </a>
+        </li>
+        <li class="project-card">
+            <a class="project-link" href="./other/med-log-parser.html">
+                <div class="project-icon">
+                    <i class="fas fa-file-code"></i>
+                </div>
+                <span class="project-name">Json Log Parser</span>
+                <div class="chevron">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </a>
+        </li>
+        <li class="project-card">
+            <a class="project-link" href="./other/dizel-filtre-iptal.html">
+                <div class="project-icon">
+                    <i class="fas fa-filter"></i>
+                </div>
+                <span class="project-name">Dizel Araç Filtre İptali</span>
+                <div class="chevron">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </a>
+        </li>
+        <li class="project-card">
+            <a class="project-link" href="./other/html-preview.html">
+                <div class="project-icon">
+                    <i class="fas fa-code"></i>
+                </div>
+                <span class="project-name">HTML Önizleme</span>
+                <div class="chevron">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </a>
+        </li>
+    </ul>
+
+    <div class="date-display" id="dateDisplay">2025-06-19 09:07:05 UTC</div>
+</div>
+
+<script>
+    // Theme Switcher Functionality
+    const themeSwitcher = document.getElementById('themeSwitcher');
+    const themeIcon = document.getElementById('themeIcon');
+    const html = document.documentElement;
+    const dateDisplay = document.getElementById('dateDisplay');
+
+    // Set current user login
+    const currentUser = 'current-user';
+
+    // Initialize mouse position tracking for spotlight effect
+    let mouseX = 0;
+    let mouseY = 0;
+
+    document.addEventListener('mousemove', (e) => {
+        if (html.classList.contains('dark-mode')) {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            document.documentElement.style.setProperty('--mouse-x', mouseX + 'px');
+            document.documentElement.style.setProperty('--mouse-y', mouseY + 'px');
+        }
+    });
+
+    // Theme toggle function
+    themeSwitcher.addEventListener('click', () => {
+        html.classList.toggle('dark-mode');
+
+        if (html.classList.contains('dark-mode')) {
+            themeIcon.classList.remove('fa-lightbulb');
+            themeIcon.classList.add('fa-lightbulb');
+
+            // Track initial mouse position for spotlight
+            document.documentElement.style.setProperty('--mouse-x', mouseX + 'px');
+            document.documentElement.style.setProperty('--mouse-y', mouseY + 'px');
+        } else {
+            themeIcon.classList.remove('fa-lightbulb');
+            themeIcon.classList.add('fa-lightbulb');
+        }
+    });
+</script>
 </body>
 </html>
