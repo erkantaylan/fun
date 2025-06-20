@@ -3,6 +3,7 @@
     const medicationNameInput = document.getElementById('medicationName');
     const timesPerDayInput = document.getElementById('timesPerDay');
     const doseAmountInput = document.getElementById('doseAmount');
+    const doseUnitSelect = document.getElementById('doseUnit');
     const sleepTimeInput = document.getElementById('sleepTime');
     const wakeTimeInput = document.getElementById('wakeTime');
     const periodValueInput = document.getElementById('periodValue');
@@ -25,6 +26,25 @@
 
     // Medications array
     let medications = JSON.parse(localStorage.getItem('medications')) || [];
+
+    // Fix for medications without medicationTimes or doseUnit
+    medications = medications.map(med => {
+        if (!med.medicationTimes) {
+            const sleepTime = med.sleepTime || "23:00";
+            const wakeTime = med.wakeTime || "07:00";
+            med.medicationTimes = calculateMedicationTimes(med.timesPerDay || 1, sleepTime, wakeTime);
+            med.sleepTime = sleepTime;
+            med.wakeTime = wakeTime;
+        }
+
+        // Add doseUnit if missing (for backward compatibility)
+        if (!med.doseUnit) {
+            med.doseUnit = 'tablet'; // Default to tablet
+        }
+
+        return med;
+    });
+    saveMedications(); // Save the fixed data
 
     // Months in Turkish
     const months = [
@@ -50,47 +70,58 @@
 
     // Calculate medication times
     function calculateMedicationTimes(timesPerDay, sleepTime, wakeTime) {
-        // Parse sleep and wake times
-        const sleepHour = parseInt(sleepTime.split(':')[0]);
-        const sleepMinute = parseInt(sleepTime.split(':')[1]);
-        const wakeHour = parseInt(wakeTime.split(':')[0]);
-        const wakeMinute = parseInt(wakeTime.split(':')[1]);
+        // Default values if not provided
+        sleepTime = sleepTime || "23:00";
+        wakeTime = wakeTime || "07:00";
+        timesPerDay = timesPerDay || 1;
 
-        // Calculate sleep duration in minutes
-        let sleepDurationMinutes = ((24 - sleepHour) * 60 - sleepMinute) + (wakeHour * 60 + wakeMinute);
+        try {
+            // Parse sleep and wake times
+            const sleepHour = parseInt(sleepTime.split(':')[0]);
+            const sleepMinute = parseInt(sleepTime.split(':')[1]);
+            const wakeHour = parseInt(wakeTime.split(':')[0]);
+            const wakeMinute = parseInt(wakeTime.split(':')[1]);
 
-        // Calculate awake duration in minutes
-        const awakeDurationMinutes = 24 * 60 - sleepDurationMinutes;
+            // Calculate sleep duration in minutes
+            let sleepDurationMinutes = ((24 - sleepHour) * 60 - sleepMinute) + (wakeHour * 60 + wakeMinute);
 
-        // Calculate interval between doses in minutes
-        const intervalMinutes = Math.floor(awakeDurationMinutes / timesPerDay);
+            // Calculate awake duration in minutes
+            const awakeDurationMinutes = 24 * 60 - sleepDurationMinutes;
 
-        // Start from wake time and calculate dose times
-        const medicationTimes = [];
-        let currentTimeMinutes = wakeHour * 60 + wakeMinute;
+            // Calculate interval between doses in minutes
+            const intervalMinutes = Math.floor(awakeDurationMinutes / timesPerDay);
 
-        for (let i = 0; i < timesPerDay; i++) {
-            const hour = Math.floor(currentTimeMinutes / 60) % 24;
-            const minute = currentTimeMinutes % 60;
+            // Start from wake time and calculate dose times
+            const medicationTimes = [];
+            let currentTimeMinutes = wakeHour * 60 + wakeMinute;
 
-            // Format as HH:MM
-            medicationTimes.push(`${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`);
+            for (let i = 0; i < timesPerDay; i++) {
+                const hour = Math.floor(currentTimeMinutes / 60) % 24;
+                const minute = currentTimeMinutes % 60;
 
-            // Add interval for next dose
-            currentTimeMinutes = (currentTimeMinutes + intervalMinutes) % (24 * 60);
+                // Format as HH:MM
+                medicationTimes.push(`${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`);
 
-            // Check if next dose would be during sleep time
-            const nextDoseHour = Math.floor(currentTimeMinutes / 60) % 24;
-            const nextDoseMinute = currentTimeMinutes % 60;
+                // Add interval for next dose
+                currentTimeMinutes = (currentTimeMinutes + intervalMinutes) % (24 * 60);
 
-            // If next dose time is after sleep time but before wake time, adjust to wake time
-            if ((nextDoseHour > sleepHour || (nextDoseHour === sleepHour && nextDoseMinute >= sleepMinute)) ||
-                (nextDoseHour < wakeHour || (nextDoseHour === wakeHour && nextDoseMinute < wakeMinute))) {
-                currentTimeMinutes = wakeHour * 60 + wakeMinute;
+                // Check if next dose would be during sleep time
+                const nextDoseHour = Math.floor(currentTimeMinutes / 60) % 24;
+                const nextDoseMinute = currentTimeMinutes % 60;
+
+                // If next dose time is after sleep time but before wake time, adjust to wake time
+                if ((nextDoseHour > sleepHour || (nextDoseHour === sleepHour && nextDoseMinute >= sleepMinute)) ||
+                    (nextDoseHour < wakeHour || (nextDoseHour === wakeHour && nextDoseMinute < wakeMinute))) {
+                    currentTimeMinutes = wakeHour * 60 + wakeMinute;
+                }
             }
-        }
 
-        return medicationTimes;
+            return medicationTimes;
+        } catch (error) {
+            console.error("Error calculating medication times:", error);
+            // Return default times as fallback
+            return ["08:00"];
+        }
     }
 
     // Add medication
@@ -98,6 +129,7 @@
         const name = medicationNameInput.value.trim();
         const timesPerDay = parseInt(timesPerDayInput.value) || 1;
         const doseAmount = parseFloat(doseAmountInput.value) || 1;
+        const doseUnit = doseUnitSelect.value;
         const sleepTime = sleepTimeInput.value;
         const wakeTime = wakeTimeInput.value;
         const periodValue = parseInt(periodValueInput.value) || 1;
@@ -123,6 +155,7 @@
             dosageStr,
             timesPerDay,
             doseAmount,
+            doseUnit,
             sleepTime,
             wakeTime,
             medicationTimes,
@@ -183,11 +216,19 @@
             const li = document.createElement('li');
             const periodText = getPeriodText(med);
 
+            // Check if medicationTimes exists and is an array before using join()
+            const medicationTimesText = Array.isArray(med.medicationTimes) ?
+                med.medicationTimes.join(', ') :
+                'Belirtilmemiş';
+
+            // Get dose unit (for backward compatibility)
+            const doseUnit = med.doseUnit || 'tablet';
+
             li.innerHTML = `
                 <div>
                     <strong>${med.name}</strong>
-                    <div>Doz: ${med.dosageStr} (günde ${med.timesPerDay} kez ${med.doseAmount})</div>
-                    <div>Kullanım Saatleri: ${med.medicationTimes.join(', ')}</div>
+                    <div>Doz: ${med.dosageStr} (günde ${med.timesPerDay} kez ${med.doseAmount} ${doseUnit})</div>
+                    <div>Kullanım Saatleri: ${medicationTimesText}</div>
                     <div>Periyot: ${periodText}</div>
                 </div>
                 <button class="delete-btn" data-id="${med.id}">Sil</button>
@@ -271,12 +312,17 @@
                 const medDiv = document.createElement('div');
                 medDiv.className = 'med-schedule';
 
+                // Check if medicationTimes exists and is an array
+                const medicationTimesHtml = Array.isArray(med.medicationTimes) ?
+                    med.medicationTimes.map(time => `<li>${time} - ${med.doseAmount} ${med.doseUnit || 'tablet'}</li>`).join('') :
+                    '<li>Belirtilmemiş</li>';
+
                 medDiv.innerHTML = `
                     <h3>${med.name}</h3>
-                    <p>Doz: ${med.dosageStr} (${med.doseAmount} birim)</p>
+                    <p>Doz: ${med.dosageStr} (${med.doseAmount} ${med.doseUnit || 'tablet'})</p>
                     <p>Kullanım saatleri:</p>
                     <ul class="time-list">
-                        ${med.medicationTimes.map(time => `<li>${time}</li>`).join('')}
+                        ${medicationTimesHtml}
                     </ul>
                 `;
 

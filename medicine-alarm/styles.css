@@ -75,9 +75,20 @@ input, select {
 
 .period-inputs input,
 .period-inputs select,
-.dosage-inputs input,
 .time-inputs input {
     flex: 1;
+}
+
+.dosage-inputs input:nth-child(1) {
+    flex: 0.8;
+}
+
+.dosage-inputs input:nth-child(3) {
+    flex: 0.8;
+}
+
+.dosage-inputs select {
+    flex: 1.4;
 }
 
 button {
@@ -353,8 +364,19 @@ button:hover {
         align-items: center;
     }
 
-    .period-inputs, .dosage-inputs, .time-inputs {
+    .period-inputs, .time-inputs {
         flex-direction: column;
+    }
+
+    .dosage-inputs {
+        flex-wrap: wrap;
+    }
+
+    .dosage-inputs input,
+    .dosage-inputs select,
+    .dosage-inputs span {
+        flex: 1 0 30%;
+        margin-bottom: 5px;
     }
 
     .med-names {
