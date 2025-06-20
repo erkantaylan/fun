@@ -16,9 +16,22 @@
             <input type="text" id="medicationName" placeholder="İlaç adını giriniz">
         </div>
 
+        <div class="form-group dosage-group">
+            <label>Doz Bilgisi:</label>
+            <div class="dosage-inputs">
+                <input type="number" id="timesPerDay" min="1" value="1" placeholder="Günde kaç kez">
+                <span>x</span>
+                <input type="number" id="doseAmount" min="0.25" step="0.25" value="1" placeholder="Doz miktarı">
+            </div>
+        </div>
+
         <div class="form-group">
-            <label for="dosage">Doz (örn: 4x1.0):</label>
-            <input type="text" id="dosage" placeholder="Örn: 4x1.0">
+            <label for="sleepTime">Uyku Saati:</label>
+            <div class="time-inputs">
+                <input type="time" id="sleepTime" value="23:00">
+                <span>-</span>
+                <input type="time" id="wakeTime" value="07:00">
+            </div>
         </div>
 
         <div class="form-group period-group">
@@ -65,6 +78,15 @@
             <div class="legend-item"><span class="color-box one-med"></span> 1 İlaç</div>
             <div class="legend-item"><span class="color-box multiple-med"></span> Birden Fazla İlaç</div>
         </div>
+    </div>
+</div>
+
+<!-- Modal for day details -->
+<div id="dayModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2 id="modalDate">Tarih</h2>
+        <div id="modalContent"></div>
     </div>
 </div>
 

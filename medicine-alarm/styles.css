@@ -63,13 +63,20 @@ input, select {
     font-size: 16px;
 }
 
-.period-inputs {
+.period-inputs, .dosage-inputs, .time-inputs {
     display: flex;
     gap: 10px;
+    align-items: center;
+}
+
+.dosage-inputs span, .time-inputs span {
+    margin: 0 5px;
 }
 
 .period-inputs input,
-.period-inputs select {
+.period-inputs select,
+.dosage-inputs input,
+.time-inputs input {
     flex: 1;
 }
 
@@ -172,6 +179,13 @@ button:hover {
     display: flex;
     flex-direction: column;
     padding: 5px;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.calendar-day:hover {
+    transform: scale(1.03);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .day-number {
@@ -195,6 +209,12 @@ button:hover {
 .calendar-day.inactive {
     background-color: #f0f0f0;
     color: #aaa;
+    cursor: default;
+}
+
+.calendar-day.inactive:hover {
+    transform: none;
+    box-shadow: none;
 }
 
 .calendar-day.no-med {
@@ -241,6 +261,88 @@ button:hover {
     background-color: rgba(52, 168, 83, 0.3);
 }
 
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    overflow: auto;
+}
+
+.modal-content {
+    position: relative;
+    background-color: white;
+    margin: 10% auto;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    width: 80%;
+    max-width: 600px;
+    animation: modalopen 0.3s;
+}
+
+@keyframes modalopen {
+    from {opacity: 0; transform: translateY(-30px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+.close-modal {
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #aaa;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.close-modal:hover {
+    color: var(--danger-color);
+}
+
+#modalDate {
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.med-schedule {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-left: 4px solid var(--primary-color);
+    background-color: #f9f9f9;
+}
+
+.med-schedule h3 {
+    color: var(--dark-color);
+    margin-bottom: 5px;
+}
+
+.time-list {
+    list-style-type: none;
+    padding-left: 10px;
+}
+
+.time-list li {
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.time-list li:before {
+    content: "•";
+    color: var(--accent-color);
+    font-weight: bold;
+    margin-right: 10px;
+}
+
 @media (max-width: 768px) {
     .calendar-day {
         height: 70px;
@@ -251,11 +353,17 @@ button:hover {
         align-items: center;
     }
 
-    .period-inputs {
+    .period-inputs, .dosage-inputs, .time-inputs {
         flex-direction: column;
     }
 
     .med-names {
         font-size: 10px;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 30px auto;
+        padding: 15px;
     }
 }

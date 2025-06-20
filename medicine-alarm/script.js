@@ -1,7 +1,10 @@
 ﻿document.addEventListener('DOMContentLoaded', () => {
     // Elements
     const medicationNameInput = document.getElementById('medicationName');
-    const dosageInput = document.getElementById('dosage');
+    const timesPerDayInput = document.getElementById('timesPerDay');
+    const doseAmountInput = document.getElementById('doseAmount');
+    const sleepTimeInput = document.getElementById('sleepTime');
+    const wakeTimeInput = document.getElementById('wakeTime');
     const periodValueInput = document.getElementById('periodValue');
     const periodTypeSelect = document.getElementById('periodType');
     const addMedicationButton = document.getElementById('addMedication');
@@ -10,6 +13,10 @@
     const prevMonthButton = document.getElementById('prevMonth');
     const nextMonthButton = document.getElementById('nextMonth');
     const currentMonthElement = document.getElementById('currentMonth');
+    const modal = document.getElementById('dayModal');
+    const modalDate = document.getElementById('modalDate');
+    const modalContent = document.getElementById('modalContent');
+    const closeModalBtn = document.querySelector('.close-modal');
 
     // Current date
     let currentDate = new Date();
@@ -24,21 +31,6 @@
         'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
         'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
     ];
-
-    // Parse dosage function
-    function parseDosage(dosageStr) {
-        // Expecting format like "4x1.0"
-        const match = dosageStr.match(/(\d+)x(\d+(?:\.\d+)?)/);
-
-        if (match) {
-            return {
-                timesPerDay: parseInt(match[1]),
-                amount: parseFloat(match[2])
-            };
-        }
-
-        return null;
-    }
 
     // Calculate days for period type
     function calculatePeriodDays(value, type) {
@@ -56,33 +48,84 @@
         }
     }
 
+    // Calculate medication times
+    function calculateMedicationTimes(timesPerDay, sleepTime, wakeTime) {
+        // Parse sleep and wake times
+        const sleepHour = parseInt(sleepTime.split(':')[0]);
+        const sleepMinute = parseInt(sleepTime.split(':')[1]);
+        const wakeHour = parseInt(wakeTime.split(':')[0]);
+        const wakeMinute = parseInt(wakeTime.split(':')[1]);
+
+        // Calculate sleep duration in minutes
+        let sleepDurationMinutes = ((24 - sleepHour) * 60 - sleepMinute) + (wakeHour * 60 + wakeMinute);
+
+        // Calculate awake duration in minutes
+        const awakeDurationMinutes = 24 * 60 - sleepDurationMinutes;
+
+        // Calculate interval between doses in minutes
+        const intervalMinutes = Math.floor(awakeDurationMinutes / timesPerDay);
+
+        // Start from wake time and calculate dose times
+        const medicationTimes = [];
+        let currentTimeMinutes = wakeHour * 60 + wakeMinute;
+
+        for (let i = 0; i < timesPerDay; i++) {
+            const hour = Math.floor(currentTimeMinutes / 60) % 24;
+            const minute = currentTimeMinutes % 60;
+
+            // Format as HH:MM
+            medicationTimes.push(`${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`);
+
+            // Add interval for next dose
+            currentTimeMinutes = (currentTimeMinutes + intervalMinutes) % (24 * 60);
+
+            // Check if next dose would be during sleep time
+            const nextDoseHour = Math.floor(currentTimeMinutes / 60) % 24;
+            const nextDoseMinute = currentTimeMinutes % 60;
+
+            // If next dose time is after sleep time but before wake time, adjust to wake time
+            if ((nextDoseHour > sleepHour || (nextDoseHour === sleepHour && nextDoseMinute >= sleepMinute)) ||
+                (nextDoseHour < wakeHour || (nextDoseHour === wakeHour && nextDoseMinute < wakeMinute))) {
+                currentTimeMinutes = wakeHour * 60 + wakeMinute;
+            }
+        }
+
+        return medicationTimes;
+    }
+
     // Add medication
     addMedicationButton.addEventListener('click', () => {
         const name = medicationNameInput.value.trim();
-        const dosageStr = dosageInput.value.trim();
+        const timesPerDay = parseInt(timesPerDayInput.value) || 1;
+        const doseAmount = parseFloat(doseAmountInput.value) || 1;
+        const sleepTime = sleepTimeInput.value;
+        const wakeTime = wakeTimeInput.value;
         const periodValue = parseInt(periodValueInput.value) || 1;
         const periodType = periodTypeSelect.value;
 
-        if (!name || !dosageStr || periodValue < 1) {
+        if (!name || timesPerDay < 1 || doseAmount < 0.25 || !sleepTime || !wakeTime || periodValue < 1) {
             alert('Lütfen tüm alanları doğru şekilde doldurun.');
-            return;
-        }
-
-        const dosage = parseDosage(dosageStr);
-        if (!dosage) {
-            alert('Doz formatı hatalı. Örnek: 4x1.0');
             return;
         }
 
         // Calculate period in days
         const periodDays = calculatePeriodDays(periodValue, periodType);
 
+        // Calculate medication times
+        const medicationTimes = calculateMedicationTimes(timesPerDay, sleepTime, wakeTime);
+
+        // Format dosage string
+        const dosageStr = `${timesPerDay}x${doseAmount.toFixed(2).replace(/\.00$/, '')}`;
+
         const newMedication = {
             id: Date.now(),
             name,
             dosageStr,
-            timesPerDay: dosage.timesPerDay,
-            amount: dosage.amount,
+            timesPerDay,
+            doseAmount,
+            sleepTime,
+            wakeTime,
+            medicationTimes,
             periodValue,
             periodType,
             periodDays,
@@ -96,7 +139,8 @@
 
         // Clear inputs
         medicationNameInput.value = '';
-        dosageInput.value = '';
+        timesPerDayInput.value = '1';
+        doseAmountInput.value = '1';
         periodValueInput.value = '1';
         periodTypeSelect.value = 'day';
     });
@@ -142,7 +186,8 @@
             li.innerHTML = `
                 <div>
                     <strong>${med.name}</strong>
-                    <div>Doz: ${med.dosageStr} (günde ${med.timesPerDay} kez ${med.amount})</div>
+                    <div>Doz: ${med.dosageStr} (günde ${med.timesPerDay} kez ${med.doseAmount})</div>
+                    <div>Kullanım Saatleri: ${med.medicationTimes.join(', ')}</div>
                     <div>Periyot: ${periodText}</div>
                 </div>
                 <button class="delete-btn" data-id="${med.id}">Sil</button>
@@ -198,6 +243,63 @@
         }).join(', ');
     }
 
+    // Format date for modal
+    function formatDate(date) {
+        const day = date.getDate();
+        const month = months[date.getMonth()];
+        const year = date.getFullYear();
+        const weekdays = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+        const weekday = weekdays[date.getDay()];
+
+        return `${day} ${month} ${year}, ${weekday}`;
+    }
+
+    // Show modal with medication details for a specific date
+    function showDayDetails(date) {
+        const medsForDay = getMedicationsForDate(date);
+
+        // Set modal date
+        modalDate.textContent = formatDate(date);
+
+        // Clear modal content
+        modalContent.innerHTML = '';
+
+        if (medsForDay.length === 0) {
+            modalContent.innerHTML = '<p>Bu gün için planlanmış ilaç bulunmamaktadır.</p>';
+        } else {
+            medsForDay.forEach(med => {
+                const medDiv = document.createElement('div');
+                medDiv.className = 'med-schedule';
+
+                medDiv.innerHTML = `
+                    <h3>${med.name}</h3>
+                    <p>Doz: ${med.dosageStr} (${med.doseAmount} birim)</p>
+                    <p>Kullanım saatleri:</p>
+                    <ul class="time-list">
+                        ${med.medicationTimes.map(time => `<li>${time}</li>`).join('')}
+                    </ul>
+                `;
+
+                modalContent.appendChild(medDiv);
+            });
+        }
+
+        // Show modal
+        modal.style.display = 'block';
+    }
+
+    // Close modal when clicking the close button
+    closeModalBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    // Close modal when clicking outside the modal content
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
     // Render calendar
     function renderCalendar() {
         calendar.innerHTML = '';
@@ -252,10 +354,10 @@
                 ${medsForDay.length > 0 ? `<div class="med-names">${medAbbreviations}</div>` : ''}
             `;
 
-            // Add tooltip with medication names
-            if (medsForDay.length > 0) {
-                dayDiv.title = medsForDay.map(med => `${med.name} (${med.dosageStr})`).join('\n');
-            }
+            // Add click event for day details
+            dayDiv.addEventListener('click', () => {
+                showDayDetails(date);
+            });
 
             calendar.appendChild(dayDiv);
         }
