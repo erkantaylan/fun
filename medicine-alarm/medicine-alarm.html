@@ -1,0 +1,73 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İlaç Doz Takip Uygulaması</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+    <h1>İlaç Doz Takip Uygulaması</h1>
+
+    <div class="input-section">
+        <div class="form-group">
+            <label for="medicationName">İlaç Adı:</label>
+            <input type="text" id="medicationName" placeholder="İlaç adını giriniz">
+        </div>
+
+        <div class="form-group">
+            <label for="dosage">Doz (örn: 4x1.0):</label>
+            <input type="text" id="dosage" placeholder="Örn: 4x1.0">
+        </div>
+
+        <div class="form-group period-group">
+            <label>Periyot:</label>
+            <div class="period-inputs">
+                <input type="number" id="periodValue" min="1" value="1" placeholder="Sayı">
+                <select id="periodType">
+                    <option value="day">Günde</option>
+                    <option value="week">Haftada</option>
+                    <option value="month">Ayda</option>
+                    <option value="year">Yılda</option>
+                </select>
+            </div>
+        </div>
+
+        <button id="addMedication">İlaç Ekle</button>
+    </div>
+
+    <div class="medications-list">
+        <h2>Eklenen İlaçlar</h2>
+        <ul id="medicationsList"></ul>
+    </div>
+
+    <div class="calendar-section">
+        <h2>Takvim</h2>
+        <div class="calendar-controls">
+            <button id="prevMonth">&lt;</button>
+            <span id="currentMonth">Haziran 2025</span>
+            <button id="nextMonth">&gt;</button>
+        </div>
+        <div class="weekdays">
+            <div>Pzt</div>
+            <div>Sal</div>
+            <div>Çar</div>
+            <div>Per</div>
+            <div>Cum</div>
+            <div>Cmt</div>
+            <div>Paz</div>
+        </div>
+        <div class="calendar" id="calendar"></div>
+
+        <div class="legend">
+            <div class="legend-item"><span class="color-box no-med"></span> İlaç Yok</div>
+            <div class="legend-item"><span class="color-box one-med"></span> 1 İlaç</div>
+            <div class="legend-item"><span class="color-box multiple-med"></span> Birden Fazla İlaç</div>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
