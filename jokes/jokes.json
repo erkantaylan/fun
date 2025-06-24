@@ -235,5 +235,35 @@
     "question": "If a blind person was feeling up your leg he'd think he was reading braille",
     "answer": "",
     "tags": ["blind person", "braille", "inappropriate", "wordplay"]
+  },
+  {
+    "question": "Hayret eden müzik türüne ne denir",
+    "answer": "İlahi",
+    "tags": ["müzik", "hayret", "kelime oyunu", "din"]
+  },
+  {
+    "question": "Bi balıkla, kuş bir araya gelince ne konuşurlar",
+    "answer": "Havadan sudan",
+    "tags": ["balık", "kuş", "kelime oyunu", "konuşma"]
+  },
+  {
+    "question": "On yavru birden doğuran kanguruya kocası ne demiş",
+    "answer": "Kesene bereket",
+    "tags": ["kanguru", "yavru", "kelime oyunu", "bereket"]
+  },
+  {
+    "question": "Bir adam eşinden boşanmak istiyormuş. Karadenizli avukata, tek celsede boşanır mıyız avukat bey demiş",
+    "answer": "Avukat da, tek celse olmaz, beraber gelin demiş",
+    "tags": ["karadeniz", "avukat", "boşanma", "kelime oyunu"]
+  },
+  {
+    "question": "Boyunu uzatmak için falcıya giden adama falcı ne yapmış",
+    "answer": "Büyü",
+    "tags": ["falcı", "boy", "büyü", "kelime oyunu"]
+  },
+  {
+    "question": "Uzun süreli sevgilisinden ayrılan karadenizli ne demiş",
+    "answer": "Ciddi ilişki",
+    "tags": ["karadeniz", "sevgili", "ayrılık", "kelime oyunu"]
   }
 ]
