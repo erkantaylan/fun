@@ -4,9 +4,9 @@
 #svg-turkey g g:hover {
     cursor: help;
 }
-#svg-turkey g g:hover path {
-    fill: var(--al) !important;
-}
+/*#svg-turkey g g:hover path {*/
+/*    fill: var(--al) !important;*/
+/*}*/
 #tooltip {
     position: absolute;
     border-radius: 7px;
@@ -33,12 +33,40 @@
 }
 
 /************************/
-
+/* Fix the selected city style to ensure it applies properly */
 g#turkey > g.selected {
-    stroke: #007bff;
-    stroke-width: 3;
-    fill: #b3d7ff !important;
+    stroke: none;
+    stroke-width: 0;
+    fill: #0249c7 !important; /* Vibrant blue fill */
+    transition: fill 0.2s ease; /* Smooth color change only */
 }
+
+/* Enhanced fancy plate numbers without fade animation */
+g#turkey > g.selected .city-plate-number {
+    font-family: 'Segoe UI', 'Inter', 'Roboto', Arial, sans-serif;
+    font-size: 18px; /* Larger size */
+    font-weight: 800; /* Extra bold */
+    fill: #ffffff; /* Bright white */
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+
+    /* Fancy effects without animation */
+    paint-order: stroke;
+    stroke: #000000; /* Black outline */
+    stroke-width: 1.5px; /* Thicker outline */
+    letter-spacing: 1px; /* More spacing between characters */
+
+    /* 3D effect with multiple shadows */
+    filter: drop-shadow(0 1px 0 rgba(0,0,0,0.7))
+    drop-shadow(0 2px 3px rgba(0,0,0,0.5));
+}
+
+/* Make sure the path fill in selected cities works properly */
+g#turkey > g.selected path {
+    fill: inherit !important; /* Ensure the fill is applied to child paths */
+}
+
 .city-label {
     font-size: 12px;
     fill: #222;

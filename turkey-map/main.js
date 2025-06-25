@@ -20,8 +20,8 @@ function tooltip_position(e) {
         cityName +
         "</span></div>";
 
-    tooltip.style.left = e.pageX + "px";
-    tooltip.style.top = e.pageY + "px";
+    tooltip.style.left = (e.pageX - 15) + "px";
+    tooltip.style.top = (e.pageY - 50) + "px";
     tooltip.style.display = "block";
 }
 
@@ -35,65 +35,52 @@ function toggle_select(e) {
     var isSelected = this.classList.contains("selected");
 
     if (isSelected) {
+        // Deselect the city
         this.classList.remove("selected");
         selectedCities.delete(cityCode);
 
-        // Remove city label
-        var label = this.querySelector("g.city-label-group");
-        if (label) {
-            this.removeChild(label);
+        // Remove plate number
+        var plateLabel = this.querySelector(".city-plate-number");
+        if (plateLabel) {
+            this.removeChild(plateLabel);
         }
     } else {
+        // Select the city
         this.classList.add("selected");
         selectedCities.add(cityCode);
 
-        // Add city badge and name side by side
+        // Remove any existing elements (cleanup)
         var existing = this.querySelector("g.city-label-group");
-        if (!existing) {
-            var path = this.querySelector("path");
-            var x = 0, y = 0;
-            if (path && typeof path.getBBox === "function") {
-                var bbox = path.getBBox();
-                x = bbox.x + bbox.width / 2;
-                y = bbox.y + bbox.height / 2;
-            }
-            var labelGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-            labelGroup.setAttribute("class", "city-label-group");
+        if (existing) {
+            this.removeChild(existing);
+        }
+        var existingPlate = this.querySelector(".city-plate-number");
+        if (existingPlate) {
+            this.removeChild(existingPlate);
+        }
 
-            // Plate badge
-            var codeRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-            codeRect.setAttribute("x", x - 17);
-            codeRect.setAttribute("y", y - 10);
-            codeRect.setAttribute("width", 22);
-            codeRect.setAttribute("height", 16);
-            codeRect.setAttribute("rx", 4);
-            codeRect.setAttribute("fill", "#0249c7");
-            codeRect.setAttribute("stroke", "#fff");
-            codeRect.setAttribute("stroke-width", 1);
+        // Find the center of the city
+        var path = this.querySelector("path");
+        var x = 0, y = 0;
+        if (path && typeof path.getBBox === "function") {
+            var bbox = path.getBBox();
+            x = bbox.x + bbox.width / 2;
+            y = bbox.y + bbox.height / 2;
+        }
 
-            var codeLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            codeLabel.setAttribute("x", x - 6);
-            codeLabel.setAttribute("y", y + 2);
-            codeLabel.setAttribute("class", "city-label city-label-plate");
-            codeLabel.setAttribute("text-anchor", "middle");
-            codeLabel.setAttribute("alignment-baseline", "middle");
-            codeLabel.setAttribute("pointer-events", "none");
-            codeLabel.textContent = cityCode;
+        // Create the fancy plate number text
+        var plateLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        plateLabel.setAttribute("x", x);
+        plateLabel.setAttribute("y", y);
+        plateLabel.setAttribute("class", "city-plate-number");
+        plateLabel.textContent = cityCode;
 
-            // City name
-            var nameLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            nameLabel.setAttribute("x", x + 16);
-            nameLabel.setAttribute("y", y + 2);
-            nameLabel.setAttribute("class", "city-label city-label-name");
-            nameLabel.setAttribute("text-anchor", "start");
-            nameLabel.setAttribute("alignment-baseline", "middle");
-            nameLabel.setAttribute("pointer-events", "none");
-            nameLabel.textContent = cityName;
+        this.appendChild(plateLabel);
 
-            labelGroup.appendChild(codeRect);
-            labelGroup.appendChild(codeLabel);
-            labelGroup.appendChild(nameLabel);
-            this.appendChild(labelGroup);
+        // Make sure the fill is applied properly to the path
+        var path = this.querySelector("path");
+        if (path) {
+            path.style.fill = "inherit";
         }
     }
 }
