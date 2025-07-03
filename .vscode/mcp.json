@@ -1,0 +1,15 @@
+{
+    "servers": {
+        "echo-mcp": {
+            "type": "stdio",
+            "command": "dotnet",
+            "args": [
+                "run",
+                "--project",
+                "D:/Projects/McpDemos/Mcp1/Mcp1.csproj"
+            ],
+            "env": {}
+        }
+    }
+
+}

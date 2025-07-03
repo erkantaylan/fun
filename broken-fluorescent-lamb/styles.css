@@ -1,0 +1,546 @@
+﻿* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #050505;
+    min-height: 100vh;
+    overflow-x: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    position: relative;
+    line-height: 1.6;
+}
+
+.room {
+    width: 100%;
+    min-height: 100vh;
+    background: radial-gradient(ellipse at center top,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0) 30%,
+    #050505 70%);
+    transition: all 0.1s ease;
+    position: relative;
+}
+
+.room.lit {
+    background: radial-gradient(ellipse at center top,
+    rgba(0, 255, 255, 0.4) 0%,
+    rgba(0, 255, 255, 0.15) 40%,
+    rgba(20, 60, 80, 0.6) 70%,
+    #0a1520 100%);
+}
+
+.neon-fixture {
+    position: fixed;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 50px;
+    background: linear-gradient(to bottom, #1a1a1a, #0d0d0d);
+    border-radius: 15px;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.8);
+    z-index: 10;
+    border: 2px solid #333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.neon-fixture:hover {
+    border-color: #555;
+    box-shadow: 0 5px 30px rgba(0,0,0,0.9);
+}
+
+.neon-fixture.broken {
+    animation: electricalDamage 0.5s ease-in-out;
+}
+
+@keyframes electricalDamage {
+    0%, 100% { transform: translateX(-50%) rotate(0deg); }
+    25% { transform: translateX(-50%) rotate(-1deg); }
+    75% { transform: translateX(-50%) rotate(1deg); }
+}
+
+.neon-tube {
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    width: 560px;
+    height: 30px;
+    background: linear-gradient(to bottom, #2a2a2a, #1a1a1a);
+    border-radius: 15px;
+    transition: all 0.05s ease;
+    box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+    border: 1px solid #444;
+    position: relative;
+    overflow: hidden;
+}
+
+.neon-tube.on {
+    background: linear-gradient(to bottom, #00ffff, #00cccc);
+    box-shadow:
+            inset 0 2px 10px rgba(0,255,255,0.3),
+            0 0 30px rgba(0, 255, 255, 1),
+            0 0 60px rgba(0, 255, 255, 0.8),
+            0 0 90px rgba(0, 255, 255, 0.6),
+            0 0 120px rgba(0, 255, 255, 0.4);
+    border-color: #00ffff;
+    animation: neonPulse 2s ease-in-out infinite alternate;
+}
+
+.neon-tube.flicker {
+    background: linear-gradient(to bottom, #66ffff, #33cccc);
+    box-shadow:
+            inset 0 2px 10px rgba(0,255,255,0.2),
+            0 0 15px rgba(0, 255, 255, 0.6),
+            0 0 30px rgba(0, 255, 255, 0.4),
+            0 0 45px rgba(0, 255, 255, 0.3);
+    border-color: #66ffff;
+}
+
+.neon-tube.damaged {
+    background: linear-gradient(to bottom, #4a2a2a, #2a1a1a);
+    border-color: #664444;
+}
+
+.damage-crack {
+    position: absolute;
+    top: 50%;
+    left: 30%;
+    width: 40%;
+    height: 2px;
+    background: #ff4444;
+    opacity: 0;
+    transform: translateY(-50%);
+    box-shadow: 0 0 10px rgba(255, 68, 68, 0.8);
+    transition: opacity 0.3s ease;
+}
+
+.damage-crack.visible {
+    opacity: 1;
+    animation: sparkle 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes sparkle {
+    0% { box-shadow: 0 0 5px rgba(255, 68, 68, 0.4); }
+    100% { box-shadow: 0 0 15px rgba(255, 68, 68, 1); }
+}
+
+.ballast-box {
+    position: absolute;
+    top: -15px;
+    right: 10px;
+    width: 80px;
+    height: 20px;
+    background: linear-gradient(to bottom, #333, #222);
+    border-radius: 5px;
+    border: 1px solid #555;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.ballast-box:hover {
+    border-color: #777;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+.ballast-box.damaged {
+    background: linear-gradient(to bottom, #553333, #332222);
+    border-color: #664444;
+    animation: electricalSpark 1s ease-in-out infinite;
+}
+
+@keyframes electricalSpark {
+    0%, 90%, 100% { box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+    95% { box-shadow: 0 2px 15px rgba(255, 68, 68, 0.8); }
+}
+
+@keyframes neonPulse {
+    0% {
+        box-shadow:
+                inset 0 2px 10px rgba(0,255,255,0.3),
+                0 0 30px rgba(0, 255, 255, 0.8),
+                0 0 60px rgba(0, 255, 255, 0.6),
+                0 0 90px rgba(0, 255, 255, 0.4);
+    }
+    100% {
+        box-shadow:
+                inset 0 2px 10px rgba(0,255,255,0.4),
+                0 0 40px rgba(0, 255, 255, 1),
+                0 0 80px rgba(0, 255, 255, 0.8),
+                0 0 120px rgba(0, 255, 255, 0.6);
+    }
+}
+
+.light-glow {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 400px;
+    background: radial-gradient(ellipse at center,
+    rgba(0, 255, 255, 0.2) 0%,
+    rgba(0, 255, 255, 0.1) 40%,
+    rgba(0, 255, 255, 0.05) 60%,
+    transparent 100%);
+    opacity: 0;
+    transition: opacity 0.1s ease;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.light-glow.active {
+    opacity: 1;
+}
+
+.switch-container {
+    position: fixed;
+    top: 30px;
+    right: 30px;
+    z-index: 20;
+    background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+    padding: 20px;
+    border-radius: 15px;
+    border: 2px solid #444;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+}
+
+.switch-container.lit {
+    box-shadow:
+            0 8px 25px rgba(0,0,0,0.6),
+            0 0 20px rgba(0, 255, 255, 0.3);
+    border-color: #00ffff;
+}
+
+.switch-plate {
+    width: 80px;
+    height: 120px;
+    background: linear-gradient(135deg, #f0f0f0, #d0d0d0);
+    border-radius: 8px;
+    position: relative;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+    border: 1px solid #bbb;
+}
+
+.switch-toggle {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 40px;
+    background: linear-gradient(135deg, #fff, #e0e0e0);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+    border: 1px solid #ccc;
+}
+
+.switch-toggle.on {
+    top: 65px;
+    background: linear-gradient(135deg, #e0e0e0, #c0c0c0);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.switch-toggle::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 30px;
+    height: 3px;
+    background: #666;
+    border-radius: 2px;
+}
+
+.switch-label {
+    color: #666;
+    font-size: 11px;
+    text-align: center;
+    margin-top: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: color 0.3s ease;
+}
+
+.switch-container.lit .switch-label {
+    color: #00ffff;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+}
+
+.repair-button {
+    position: fixed;
+    top: 180px;
+    right: 30px;
+    z-index: 20;
+    background: linear-gradient(135deg, #ff6b35, #ff4500);
+    color: white;
+    border: none;
+    padding: 15px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+.repair-button.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.repair-button:hover {
+    background: linear-gradient(135deg, #ff7b45, #ff5510);
+    box-shadow: 0 7px 20px rgba(255, 107, 53, 0.6);
+    transform: translateY(-2px);
+}
+
+.repair-button:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 10px rgba(255, 107, 53, 0.4);
+}
+
+.content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 120px 20px 50px;
+    color: #1a1a1a;
+    transition: color 0.2s ease;
+    position: relative;
+    z-index: 2;
+}
+
+.content.lit {
+    color: #e0f0ff;
+    text-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+}
+
+.content h1 {
+    font-size: 2.8em;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #0f0f0f;
+    transition: all 0.2s ease;
+}
+
+.content.lit h1 {
+    color: #00ffff;
+    text-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+}
+
+.content h2 {
+    font-size: 1.8em;
+    margin: 35px 0 20px;
+    color: #111;
+    transition: all 0.2s ease;
+    border-left: 4px solid #333;
+    padding-left: 15px;
+}
+
+.content.lit h2 {
+    color: #66ffff;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+    border-left-color: #00ffff;
+}
+
+.content h3 {
+    font-size: 1.4em;
+    margin: 25px 0 15px;
+    color: #222;
+    transition: all 0.2s ease;
+}
+
+.content.lit h3 {
+    color: #99ffff;
+    text-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
+}
+
+.content p {
+    line-height: 1.7;
+    margin-bottom: 18px;
+    font-size: 1.1em;
+}
+
+.content ul, .content ol {
+    margin: 15px 0 15px 30px;
+}
+
+.content li {
+    margin-bottom: 8px;
+    line-height: 1.6;
+}
+
+.warning-box {
+    background: rgba(255, 107, 53, 0.1);
+    border: 2px solid #ff6b35;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 25px 0;
+    transition: all 0.3s ease;
+}
+
+.content.lit .warning-box {
+    background: rgba(255, 107, 53, 0.2);
+    border-color: #ff8b65;
+    box-shadow: 0 0 15px rgba(255, 107, 53, 0.3);
+}
+
+.tip-box {
+    background: rgba(0, 255, 255, 0.05);
+    border: 2px solid #333;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 25px 0;
+    transition: all 0.3s ease;
+}
+
+.content.lit .tip-box {
+    background: rgba(0, 255, 255, 0.1);
+    border-color: #00ffff;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+}
+
+.status-text {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    color: #333;
+    font-size: 12px;
+    background: rgba(0,0,0,0.9);
+    padding: 12px;
+    border-radius: 8px;
+    z-index: 20;
+    border: 1px solid #444;
+    transition: all 0.3s ease;
+}
+
+.status-text.lit {
+    color: #00ffff;
+    border-color: #00ffff;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+}
+
+.buzzing-sound {
+    position: fixed;
+    top: 100px;
+    left: 20px;
+    color: #333;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.1s ease;
+    z-index: 20;
+    background: rgba(0,0,0,0.9);
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #444;
+}
+
+.buzzing-sound.active {
+    opacity: 1;
+    animation: buzz 0.1s infinite;
+    color: #00ffff;
+    border-color: #00ffff;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+}
+
+@keyframes buzz {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-1px); }
+    75% { transform: translateX(1px); }
+}
+
+.flicker-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 255, 255, 0.1);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.flicker-overlay.flash {
+    opacity: 1;
+}
+
+.repair-notification {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: #00ffff;
+    padding: 20px 30px;
+    border-radius: 15px;
+    border: 2px solid #00ffff;
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+    z-index: 30;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+    transition: all 0.3s ease;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.repair-notification.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.interactive-hint {
+    position: fixed;
+    top: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: #ff6b35;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    z-index: 15;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border: 1px solid #ff6b35;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.interactive-hint.visible {
+    opacity: 1;
+}
+
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 0 5px rgba(255, 107, 53, 0.3); }
+    50% { box-shadow: 0 0 20px rgba(255, 107, 53, 0.6); }
+}
+
+/* Neon reflection effects */
+.neon-tube::after {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 10%;
+    width: 80%;
+    height: 8px;
+    background: linear-gradient(to right,
+    transparent,
+    rgba(255,255,255,0.3),
+    transparent);
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.1s ease;
+}
+
+.neon-tube.on::after {
+    opacity: 1;
+}

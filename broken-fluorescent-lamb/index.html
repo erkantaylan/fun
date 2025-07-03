@@ -1,0 +1,175 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Broken Neon Light - Interactive Repair Guide</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="room" id="room">
+    <div class="neon-fixture" id="fixture">
+        <div class="neon-tube" id="tube">
+            <div class="damage-crack" id="crack"></div>
+        </div>
+        <div class="ballast-box" id="ballast" title="Click to replace ballast"></div>
+    </div>
+
+    <div class="light-glow" id="glow"></div>
+
+    <div class="interactive-hint" id="hint">Click the switch to turn on the light!</div>
+
+    <div class="switch-container" id="switchContainer">
+        <div class="switch-plate">
+            <div class="switch-toggle" id="switch"></div>
+        </div>
+        <div class="switch-label">Neon Light</div>
+    </div>
+
+    <button class="repair-button" id="repairBtn">🔧 Emergency Repair (Click 5 times)</button>
+
+    <div class="buzzing-sound" id="buzz">*bzzzzt* *electrical crackling* *pop*</div>
+
+    <div class="status-text" id="statusContainer">
+        Neon Light Status: <span id="status">OFF</span><br>
+        Ballast Condition: <span id="ballastStatus">Good</span><br>
+        Repair clicks: <span id="clickCount">0/5</span>
+    </div>
+
+    <div class="flicker-overlay" id="overlay"></div>
+
+    <div class="repair-notification" id="notification"></div>
+
+    <div class="content" id="content">
+        <h1>The Ultimate Guide to Broken Fluorescent & Neon Lights</h1>
+
+        <h2>🔥 Why Broken Lights Are So Incredibly Annoying</h2>
+        <p>There's nothing quite like the maddening experience of trying to work, read, or simply exist under a malfunctioning fluorescent or neon light. The constant flickering creates a strobe effect that can trigger headaches, eye strain, and an overwhelming sense of irritation that builds with each unpredictable flash.</p>
+
+        <p>The psychological impact is real - broken lights create an atmosphere of neglect and dysfunction that affects productivity, mood, and overall well-being. The irregular patterns make it impossible to ignore, constantly drawing your attention away from whatever you're trying to accomplish.</p>
+
+        <div class="warning-box">
+            <strong>⚠️ Health Warning:</strong> Prolonged exposure to flickering lights can cause migraines, seizures in photosensitive individuals, and significant eye strain. If you experience severe symptoms, seek immediate medical attention and avoid the area until repairs are completed.
+        </div>
+
+        <h2>🔧 Common Causes of Light Failure</h2>
+
+        <h3>1. Ballast Failure (Most Common)</h3>
+        <p>The ballast is the electrical component that regulates current flow to the fluorescent tube. When it fails, you'll experience:</p>
+        <ul>
+            <li>Intermittent flickering or strobing</li>
+            <li>Humming or buzzing sounds</li>
+            <li>Lights that take forever to turn on</li>
+            <li>Complete failure to illuminate</li>
+            <li>Overheating and potential fire hazard</li>
+        </ul>
+
+        <h3>2. Tube/Bulb Degradation</h3>
+        <p>Fluorescent tubes and neon lights have limited lifespans. Signs of aging include:</p>
+        <ul>
+            <li>Darkened ends on fluorescent tubes</li>
+            <li>Dim, inconsistent lighting</li>
+            <li>Flickering that worsens over time</li>
+            <li>Color temperature changes</li>
+        </ul>
+
+        <h2>🛠️ Interactive Repair Demo</h2>
+        <p><strong>Try it yourself!</strong> Follow these steps:</p>
+        <ol>
+            <li><strong>Click the light switch</strong> (top right) to turn on the light</li>
+            <li><strong>Wait 10 seconds</strong> - the light will break down automatically</li>
+            <li><strong>Try repairs:</strong>
+                <ul>
+                    <li>Click the light fixture for "percussive maintenance"</li>
+                    <li>Click the small ballast box (right side of fixture)</li>
+                    <li>Use the Emergency Repair button (requires 5 clicks)</li>
+                </ul>
+            </li>
+        </ol>
+
+        <div class="tip-box">
+            <strong>💡 Pro Tip:</strong> In real life, gentle tapping can sometimes temporarily fix loose connections, but it's not a permanent solution. Always call a professional for proper repairs!
+        </div>
+
+        <h2>🛠️ Professional Repair Solutions</h2>
+
+        <h3>Ballast Replacement</h3>
+        <p>This is the most common and effective repair for flickering fluorescent lights:</p>
+        <ol>
+            <li><strong>Turn off power</strong> at the circuit breaker</li>
+            <li><strong>Remove the light cover</strong> and fluorescent tubes</li>
+            <li><strong>Disconnect old ballast</strong> wiring (take photos first!)</li>
+            <li><strong>Install new ballast</strong> matching the original specifications</li>
+            <li><strong>Reconnect wiring</strong> according to the wiring diagram</li>
+            <li><strong>Test the installation</strong> before reassembling</li>
+        </ol>
+
+        <h2>⚡ Temporary Emergency Fixes</h2>
+
+        <h3>The "Percussive Maintenance" Method</h3>
+        <p>While not recommended for permanent solutions, gentle tapping can sometimes:</p>
+        <ul>
+            <li>Reseat loose connections</li>
+            <li>Temporarily restore contact in aging components</li>
+            <li>Clear minor electrical arcing</li>
+        </ul>
+
+        <div class="warning-box">
+            <strong>⚠️ Safety First:</strong> Only attempt temporary fixes if you understand electrical safety. Never touch electrical components with wet hands, and always turn off power when possible.
+        </div>
+
+        <h2>🚨 When to Call a Professional</h2>
+
+        <p>Immediately contact an electrician if you notice:</p>
+        <ul>
+            <li>Burning smells or visible smoke</li>
+            <li>Sparking or electrical arcing</li>
+            <li>Buzzing that's getting louder</li>
+            <li>Fixtures that are hot to the touch</li>
+            <li>Multiple lights failing simultaneously</li>
+            <li>Any signs of electrical damage</li>
+        </ul>
+
+        <h2>💰 Cost Analysis</h2>
+
+        <h3>DIY Repair Costs</h3>
+        <ul>
+            <li><strong>Ballast replacement:</strong> $15-50 for parts</li>
+            <li><strong>Fluorescent tubes:</strong> $5-15 each</li>
+            <li><strong>Basic tools:</strong> $20-40 (one-time cost)</li>
+        </ul>
+
+        <h3>Professional Service</h3>
+        <ul>
+            <li><strong>Service call:</strong> $75-150</li>
+            <li><strong>Ballast replacement:</strong> $100-200 total</li>
+            <li><strong>Complete fixture replacement:</strong> $150-400</li>
+        </ul>
+
+        <h2>🔮 Modern Alternatives</h2>
+
+        <h3>LED Conversion</h3>
+        <p>Consider upgrading to LED technology:</p>
+        <ul>
+            <li><strong>Energy savings:</strong> 50-70% reduction in power consumption</li>
+            <li><strong>Longevity:</strong> 25,000-50,000 hour lifespan</li>
+            <li><strong>No flickering:</strong> Stable, consistent illumination</li>
+            <li><strong>No ballast needed:</strong> Eliminates the most common failure point</li>
+        </ul>
+
+        <h2>🔍 Prevention and Maintenance</h2>
+
+        <h3>Regular Inspection Schedule</h3>
+        <ul>
+            <li><strong>Monthly:</strong> Check for flickering, unusual sounds, or dim spots</li>
+            <li><strong>Quarterly:</strong> Clean fixtures and check for loose connections</li>
+            <li><strong>Annually:</strong> Professional inspection of electrical components</li>
+        </ul>
+
+        <p><strong>Remember:</strong> The interactive demo above shows how these repairs work, but always prioritize safety and call professionals for real electrical work!</p>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
