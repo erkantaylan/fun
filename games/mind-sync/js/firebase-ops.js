@@ -57,6 +57,20 @@ async function cleanupOldRooms() {
 }
 
 /**
+ * Force delete ALL game rooms (for testing/admin use)
+ * Run from console: await forceCleanupAllRooms()
+ */
+async function forceCleanupAllRooms() {
+    try {
+        const gamesRef = ref(db, 'games');
+        await remove(gamesRef);
+        console.log('[Cleanup] Deleted ALL rooms!');
+    } catch (error) {
+        console.error('[Cleanup] Error:', error);
+    }
+}
+
+/**
  * Create a new game room
  * @param {string} roomCode - The room code to use
  */
@@ -331,4 +345,11 @@ export async function getRoomData() {
     return snapshot.exists() ? snapshot.val() : null;
 }
 
-export { ref, get, update };
+// Export for module use
+export { ref, get, update, cleanupOldRooms };
+
+// Attach to window for console testing
+if (typeof window !== 'undefined') {
+    window.cleanupOldRooms = cleanupOldRooms;
+    window.forceCleanupAllRooms = forceCleanupAllRooms;
+}
