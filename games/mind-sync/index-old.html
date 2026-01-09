@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mind Sync - İşbirlikçi Kart Oyunu</title>
+    <meta name="description" content="2 kişilik işbirlikçi kart oyunu. Konuşmadan kartları sırayla oyna - saf sezgi!">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="game-container">
+        <!-- Language Switcher -->
+        <div class="language-switcher">
+            <button class="lang-btn active" data-lang="tr">🇹🇷 TR</button>
+            <button class="lang-btn" data-lang="en">🇬🇧 EN</button>
+        </div>
+
+        <!-- Header -->
+        <header class="game-header">
+            <h1>🧠 Mind Sync</h1>
+            <p class="tagline" data-tr="Uyum içinde oyna. Kelimeye gerek yok."
+                data-en="Play in harmony. No words needed.">Uyum içinde oyna. Kelimeye gerek yok.</p>
+        </header>
+
+        <!-- Lobby Screen -->
+        <section id="lobby" class="screen active">
+            <div class="lobby-box">
+                <h2 data-tr="Oyun Başlat" data-en="Start a Game">Oyun Başlat</h2>
+
+                <!-- Settings Panel -->
+                <div class="settings-panel">
+                    <h3>⚙️ <span data-tr="Oyun Ayarları" data-en="Game Settings">Oyun Ayarları</span></h3>
+
+                    <div class="setting-group">
+                        <label data-tr="Zorluk" data-en="Difficulty">Zorluk</label>
+                        <div class="setting-options" id="difficultyOptions">
+                            <button class="setting-btn" data-value="easy" data-cards="6" data-hand="3">
+                                <span data-tr="Kolay" data-en="Easy">Kolay</span>
+                                <small>1-6</small>
+                            </button>
+                            <button class="setting-btn active" data-value="normal" data-cards="10" data-hand="5">
+                                <span data-tr="Normal" data-en="Normal">Normal</span>
+                                <small>1-10</small>
+                            </button>
+                            <button class="setting-btn" data-value="hard" data-cards="20" data-hand="5">
+                                <span data-tr="Zor" data-en="Hard">Zor</span>
+                                <small>1-20</small>
+                            </button>
+                            <button class="setting-btn" data-value="extreme" data-cards="50" data-hand="5">
+                                <span data-tr="Ekstrem" data-en="Extreme">Ekstrem</span>
+                                <small>1-50</small>
+                            </button>
+                        </div>
+                        <p class="setting-hint" data-tr="Kart aralığı ve el büyüklüğü"
+                            data-en="Card range and hand size">Kart aralığı ve el büyüklüğü</p>
+                    </div>
+
+                    <div class="setting-group">
+                        <label data-tr="İzin Verilen Hata" data-en="Mistakes Allowed">İzin Verilen Hata</label>
+                        <div class="setting-options" id="mistakeOptions">
+                            <button class="setting-btn active" data-value="0">∞ <span data-tr="Sınırsız"
+                                    data-en="Infinite">Sınırsız</span></button>
+                            <button class="setting-btn" data-value="1">1</button>
+                            <button class="setting-btn" data-value="2">2</button>
+                            <button class="setting-btn" data-value="3">3</button>
+                        </div>
+                        <p class="setting-hint" data-tr="Sınırsız = antrenman modu, hatalarda oyun bitmez"
+                            data-en="Infinite = practice mode, no game over on mistakes">Sınırsız = antrenman modu,
+                            hatalarda oyun bitmez</p>
+                    </div>
+
+                    <div class="setting-group">
+                        <label data-tr="Süre (hamle başına)" data-en="Timer (per move)">Süre (hamle başına)</label>
+                        <div class="setting-options" id="timerOptions">
+                            <button class="setting-btn" data-value="0" data-tr="Kapalı" data-en="Off">Kapalı</button>
+                            <button class="setting-btn" data-value="10">10s</button>
+                            <button class="setting-btn active" data-value="15">15s</button>
+                            <button class="setting-btn" data-value="30">30s</button>
+                            <button class="setting-btn" data-value="60">60s</button>
+                        </div>
+                        <p class="setting-hint" data-tr="Her hamle için süre limiti"
+                            data-en="Time limit for each move before game over">Her hamle için süre limiti</p>
+                    </div>
+                </div>
+
+                <div class="lobby-options">
+                    <button id="createRoomBtn" class="btn btn-primary">
+                        <span class="btn-icon">🎮</span>
+                        <span data-tr="Oda Oluştur" data-en="Create Room">Oda Oluştur</span>
+                    </button>
+
+                    <div class="divider">
+                        <span data-tr="veya" data-en="or">veya</span>
+                    </div>
+
+                    <div class="join-section">
+                        <input type="text" id="roomCodeInput" data-placeholder-tr="Oda kodu gir"
+                            data-placeholder-en="Enter room code" placeholder="Oda kodu gir" maxlength="6"
+                            autocomplete="off">
+                        <button id="joinRoomBtn" class="btn btn-secondary" data-tr="Katıl" data-en="Join">Katıl</button>
+                    </div>
+                </div>
+
+                <div id="roomInfo" class="room-info hidden">
+                    <p data-tr="Bu kodu partnerinle paylaş:" data-en="Share this code with your partner:">Bu kodu
+                        partnerinle paylaş:</p>
+                    <div class="room-code" id="roomCodeDisplay"></div>
+                    <div class="room-settings-display">
+                        <span id="roomSettingsText"></span>
+                    </div>
+                    <p class="waiting-text" data-tr="⏳ Partner bekleniyor..."
+                        data-en="⏳ Waiting for partner to join...">⏳ Partner bekleniyor...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Game Screen -->
+        <section id="game" class="screen">
+            <div class="game-layout">
+                <!-- Timer & Status -->
+                <div class="game-status">
+                    <div class="timer-container" id="timerContainer">
+                        <div class="timer-ring">
+                            <svg viewBox="0 0 100 100">
+                                <circle class="timer-bg" cx="50" cy="50" r="45" />
+                                <circle class="timer-progress" id="timerProgress" cx="50" cy="50" r="45" />
+                            </svg>
+                            <span class="timer-text" id="timerText">15</span>
+                        </div>
+                    </div>
+                    <div class="pile-info">
+                        <span class="pile-label" data-tr="Sıradaki kart:" data-en="Next card needed:">Sıradaki
+                            kart:</span>
+                        <span class="pile-number" id="nextCardNeeded">1</span>
+                    </div>
+                    <div class="status-right">
+                        <div class="cards-played">
+                            <span id="cardsPlayedCount">0</span>/10 <span data-tr="kart" data-en="cards">kart</span>
+                        </div>
+                        <div class="mistakes-display" id="mistakesDisplay">
+                            <span class="mistakes-label" data-tr="Hata:" data-en="Mistakes:">Hata:</span>
+                            <span class="mistakes-value" id="mistakesValue">∞</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Center Pile -->
+                <div class="pile-area">
+                    <div class="pile" id="pile">
+                        <div class="pile-placeholder">
+                            <span>?</span>
+                        </div>
+                    </div>
+                    <div class="last-played hidden" id="lastPlayedInfo">
+                        <span id="lastPlayerName"></span> <span data-tr="oynadı" data-en="played">oynadı</span> <span
+                            id="lastCardValue"></span>
+                    </div>
+                </div>
+
+                <!-- Player's Hand -->
+                <div class="hand-area">
+                    <h3 data-tr="Senin Kartların" data-en="Your Cards">Senin Kartların</h3>
+                    <div class="hand" id="playerHand">
+                        <!-- Cards will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Player Info -->
+                <div class="player-info">
+                    <div class="player-badge" id="playerBadge" data-tr-prefix="Oyuncu" data-en-prefix="Player">Oyuncu 1
+                    </div>
+                    <div class="partner-status">
+                        <span data-tr="Partner:" data-en="Partner:">Partner:</span> <span id="partnerStatus"
+                            data-tr-connected="🟢 Bağlı" data-tr-disconnected="🔴 Bağlantı Kesildi"
+                            data-en-connected="🟢 Connected" data-en-disconnected="🔴 Disconnected">🟢 Bağlı</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Result Screen -->
+        <section id="result" class="screen">
+            <div class="result-box">
+                <div class="result-icon" id="resultIcon">🏆</div>
+                <h2 id="resultTitle">Zafer!</h2>
+                <p id="resultMessage">Tüm 10 kartı mükemmel uyum içinde oynadınız!</p>
+
+                <div class="result-stats">
+                    <div class="stat">
+                        <span class="stat-value" id="statCardsPlayed">10</span>
+                        <span class="stat-label" data-tr="Oynanan Kart" data-en="Cards Played">Oynanan Kart</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value" id="statMistakeCard">-</span>
+                        <span class="stat-label" data-tr="Hata Kartı" data-en="Mistake At">Hata Kartı</span>
+                    </div>
+                </div>
+
+                <button id="playAgainBtn" class="btn btn-primary">
+                    <span class="btn-icon">🔄</span>
+                    <span data-tr="Tekrar Oyna" data-en="Play Again">Tekrar Oyna</span>
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+        import { getDatabase, ref, set, get, onValue, push, update, remove, onDisconnect } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+
+        // ========== FIREBASE CONFIG ==========
+        // ⚠️ UPDATE databaseURL if needed!
+        const firebaseConfig = {
+            apiKey: "AIzaSyDNyK1UYWIjGuBYDO7Fl-UnZD5Yq1FaqOA",
+            authDomain: "erkantaylan-github-io.firebaseapp.com",
+            databaseURL: "https://erkantaylan-github-io-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "erkantaylan-github-io",
+            storageBucket: "erkantaylan-github-io.firebasestorage.app",
+            messagingSenderId: "420640417772",
+            appId: "1:420640417772:web:0126d1c4018600b78e42c9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // ========== GAME SETTINGS ==========
+        let gameSettings = {
+            difficulty: 'normal',
+            totalCards: 10,      // Total cards in game (1 to N)
+            cardsPerPlayer: 5,   // Cards each player gets
+            mistakesAllowed: 0,  // 0 = infinite, 1-3 = limited
+            timerDuration: 15    // 0 = off, or seconds
+        };
+
+        const PLAY_COOLDOWN = 3000; // 3 seconds cooldown after playing
+
+        // ========== GAME STATE ==========
+        let gameState = {
+            roomCode: null,
+            playerId: null, // 1 or 2
+            myCards: [],
+            playedCards: [],
+            nextExpected: 1,
+            mistakesMade: 0,
+            mistakesRemaining: 0,
+            timerInterval: null,
+            gameRef: null,
+            isHost: false,
+            settings: null,
+            lastPlayTime: 0,      // Timestamp of last play by this player
+            canPlay: true         // Whether this player can play (cooldown)
+        };
+
+        // ========== DOM ELEMENTS ==========
+        const screens = {
+            lobby: document.getElementById('lobby'),
+            game: document.getElementById('game'),
+            result: document.getElementById('result')
+        };
+
+        const elements = {
+            // Lobby
+            createRoomBtn: document.getElementById('createRoomBtn'),
+            joinRoomBtn: document.getElementById('joinRoomBtn'),
+            roomCodeInput: document.getElementById('roomCodeInput'),
+            roomInfo: document.getElementById('roomInfo'),
+            roomCodeDisplay: document.getElementById('roomCodeDisplay'),
+            roomSettingsText: document.getElementById('roomSettingsText'),
+            mistakeOptions: document.getElementById('mistakeOptions'),
+            timerOptions: document.getElementById('timerOptions'),
+            // Game
+            playerHand: document.getElementById('playerHand'),
+            pile: document.getElementById('pile'),
+            nextCardNeeded: document.getElementById('nextCardNeeded'),
+            cardsPlayedCount: document.getElementById('cardsPlayedCount'),
+            timerContainer: document.getElementById('timerContainer'),
+            timerText: document.getElementById('timerText'),
+            timerProgress: document.getElementById('timerProgress'),
+            mistakesDisplay: document.getElementById('mistakesDisplay'),
+            mistakesValue: document.getElementById('mistakesValue'),
+            playerBadge: document.getElementById('playerBadge'),
+            partnerStatus: document.getElementById('partnerStatus'),
+            lastPlayedInfo: document.getElementById('lastPlayedInfo'),
+            lastPlayerName: document.getElementById('lastPlayerName'),
+            lastCardValue: document.getElementById('lastCardValue'),
+            // Result
+            playAgainBtn: document.getElementById('playAgainBtn'),
+            resultIcon: document.getElementById('resultIcon'),
+            resultTitle: document.getElementById('resultTitle'),
+            resultMessage: document.getElementById('resultMessage'),
+            statCardsPlayed: document.getElementById('statCardsPlayed'),
+            statMistakeCard: document.getElementById('statMistakeCard')
+        };
+
+        // ========== LANGUAGE SYSTEM ==========
+        let currentLang = 'tr'; // Turkish is default
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('mindSyncLang', lang);
+
+            // Update language buttons
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+
+            // Update all translatable elements
+            document.querySelectorAll('[data-tr][data-en]').forEach(el => {
+                el.textContent = el.dataset[lang];
+            });
+
+            // Update placeholders
+            document.querySelectorAll('[data-placeholder-tr][data-placeholder-en]').forEach(el => {
+                el.placeholder = el.dataset[`placeholder${lang.charAt(0).toUpperCase() + lang.slice(1)}`];
+            });
+
+            // Update HTML lang attribute
+            document.documentElement.lang = lang;
+        }
+
+        function setupLanguageHandlers() {
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
+            });
+
+            // Load saved language preference
+            const savedLang = localStorage.getItem('mindSyncLang');
+            if (savedLang) {
+                setLanguage(savedLang);
+            }
+        }
+
+        // Translation helper for dynamic content
+        function t(trText, enText) {
+            return currentLang === 'tr' ? trText : enText;
+        }
+
+        // ========== SETTINGS HANDLERS ==========
+        function setupSettingsHandlers() {
+            // Difficulty options
+            const difficultyOptions = document.getElementById('difficultyOptions');
+            difficultyOptions.querySelectorAll('.setting-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    difficultyOptions.querySelectorAll('.setting-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    gameSettings.difficulty = btn.dataset.value;
+                    gameSettings.totalCards = parseInt(btn.dataset.cards);
+                    gameSettings.cardsPerPlayer = parseInt(btn.dataset.hand);
+                });
+            });
+
+            // Mistake options
+            elements.mistakeOptions.querySelectorAll('.setting-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    elements.mistakeOptions.querySelectorAll('.setting-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    gameSettings.mistakesAllowed = parseInt(btn.dataset.value);
+                });
+            });
+
+            // Timer options
+            elements.timerOptions.querySelectorAll('.setting-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    elements.timerOptions.querySelectorAll('.setting-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    gameSettings.timerDuration = parseInt(btn.dataset.value);
+                });
+            });
+        }
+
+        // Initialize handlers
+        setupSettingsHandlers();
+        setupLanguageHandlers();
+
+        // ========== SCREEN MANAGEMENT ==========
+        function showScreen(screenName) {
+            Object.values(screens).forEach(s => s.classList.remove('active'));
+            screens[screenName].classList.add('active');
+        }
+
+        // ========== ROOM CODE GENERATION ==========
+        function generateRoomCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed confusing chars
+            let code = '';
+            for (let i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        // ========== CARD SHUFFLING ==========
+        function shuffleAndDeal(settings = gameSettings) {
+            const totalCards = settings.totalCards || 10;
+            const cardsPerPlayer = settings.cardsPerPlayer || 5;
+            const totalNeeded = cardsPerPlayer * 2;
+
+            // Create full deck from 1 to totalCards
+            const fullDeck = [];
+            for (let i = 1; i <= totalCards; i++) {
+                fullDeck.push(i);
+            }
+
+            // Fisher-Yates shuffle full deck
+            for (let i = fullDeck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [fullDeck[i], fullDeck[j]] = [fullDeck[j], fullDeck[i]];
+            }
+
+            // Take only the cards we need (for harder difficulties with larger ranges)
+            const gameDeck = fullDeck.slice(0, totalNeeded);
+
+            // Shuffle again for distribution
+            for (let i = gameDeck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [gameDeck[i], gameDeck[j]] = [gameDeck[j], gameDeck[i]];
+            }
+
+            // Distribute cards to players (take separate slices before any sorting)
+            const player1Cards = gameDeck.slice(0, cardsPerPlayer);
+            const player2Cards = gameDeck.slice(cardsPerPlayer, totalNeeded);
+
+            // Sort each player's hand
+            player1Cards.sort((a, b) => a - b);
+            player2Cards.sort((a, b) => a - b);
+
+            // Create sorted list of all cards for game tracking
+            const allCards = [...gameDeck].sort((a, b) => a - b);
+
+            return {
+                player1: player1Cards,
+                player2: player2Cards,
+                allCards: allCards
+            };
+        }
+
+        // ========== CREATE ROOM ==========
+        async function createRoom() {
+            const roomCode = generateRoomCode();
+            const cards = shuffleAndDeal();
+
+            gameState.roomCode = roomCode;
+            gameState.playerId = 1;
+            gameState.isHost = true;
+            gameState.myCards = cards.player1;
+            gameState.gameRef = ref(db, `games/${roomCode}`);
+            gameState.settings = { ...gameSettings };
+            gameState.canPlay = true;
+            gameState.lastPlayTime = 0;
+
+            const roomData = {
+                status: 'waiting',
+                settings: {
+                    difficulty: gameSettings.difficulty,
+                    totalCards: gameSettings.totalCards,
+                    cardsPerPlayer: gameSettings.cardsPerPlayer,
+                    mistakesAllowed: gameSettings.mistakesAllowed,
+                    timerDuration: gameSettings.timerDuration
+                },
+                player1: {
+                    cards: cards.player1,
+                    connected: true
+                },
+                player2: {
+                    cards: cards.player2,
+                    connected: false
+                },
+                allCards: cards.allCards, // All cards in this game session
+                playedCards: [],
+                nextExpected: null, // Will be set to first card when game starts
+                mistakesMade: 0,
+                lastMove: null,
+                lastPlayerId: null, // Track who played last for cooldown
+                timerStart: null,
+                createdAt: Date.now()
+            };
+
+            try {
+                await set(gameState.gameRef, roomData);
+
+                // Show room code and settings
+                elements.roomCodeDisplay.textContent = roomCode;
+                const difficultyNames = { easy: t('Kolay', 'Easy'), normal: t('Normal', 'Normal'), hard: t('Zor', 'Hard'), extreme: t('Ekstrem', 'Extreme') };
+                const mistakesText = gameSettings.mistakesAllowed === 0
+                    ? t('∞ Sınırsız', '∞ Infinite')
+                    : gameSettings.mistakesAllowed;
+                const timerText = gameSettings.timerDuration === 0
+                    ? t('Kapalı', 'Off')
+                    : `${gameSettings.timerDuration}s`;
+                elements.roomSettingsText.textContent = `${difficultyNames[gameSettings.difficulty]} | ${t('Hata', 'Mistakes')}: ${mistakesText} | ${t('Süre', 'Timer')}: ${timerText}`;
+                elements.roomInfo.classList.remove('hidden');
+                elements.createRoomBtn.disabled = true;
+
+                // Set up disconnect handler
+                const player1Ref = ref(db, `games/${roomCode}/player1/connected`);
+                onDisconnect(player1Ref).set(false);
+
+                // Listen for player 2 to join
+                listenToRoom();
+            } catch (error) {
+                console.error('Error creating room:', error);
+                alert(t('Oda oluşturulamadı. Firebase ayarlarını kontrol edin.', 'Failed to create room. Check your Firebase config.'));
+            }
+        }
+
+        // ========== JOIN ROOM ==========
+        async function joinRoom() {
+            const roomCode = elements.roomCodeInput.value.toUpperCase().trim();
+            if (roomCode.length !== 6) {
+                alert(t('Lütfen 6 karakterli oda kodu girin', 'Please enter a 6-character room code'));
+                return;
+            }
+
+            // Check if trying to join own room
+            if (gameState.roomCode === roomCode) {
+                alert(t('Kendi odana katılamazsın! Başka bir tarayıcı veya sekme kullan.',
+                    'You cannot join your own room! Use a different browser or tab.'));
+                return;
+            }
+
+            gameState.roomCode = roomCode;
+            gameState.playerId = 2;
+            gameState.gameRef = ref(db, `games/${roomCode}`);
+
+            try {
+                const snapshot = await get(gameState.gameRef);
+                if (!snapshot.exists()) {
+                    alert(t('Oda bulunamadı!', 'Room not found!'));
+                    return;
+                }
+
+                const data = snapshot.val();
+                if (data.status !== 'waiting') {
+                    alert(t('Oyun zaten başlamış!', 'Game already in progress!'));
+                    return;
+                }
+
+                gameState.myCards = data.player2.cards;
+                gameState.settings = data.settings;
+                gameState.canPlay = true;
+                gameState.lastPlayTime = 0;
+
+                // Mark player 2 as connected and start game
+                const updateData = {
+                    'player2/connected': true,
+                    'status': 'playing',
+                    'nextExpected': data.allCards[0] // First card in sorted list
+                };
+                // Only set timer start if timer is enabled
+                if (data.settings.timerDuration > 0) {
+                    updateData.timerStart = Date.now();
+                }
+                await update(gameState.gameRef, updateData);
+
+                // Set up disconnect handler
+                const player2Ref = ref(db, `games/${roomCode}/player2/connected`);
+                onDisconnect(player2Ref).set(false);
+
+                listenToRoom();
+            } catch (error) {
+                console.error('Error joining room:', error);
+                alert(t('Odaya katılma başarısız. Tekrar deneyin.', 'Failed to join room. Please try again.'));
+            }
+        }
+
+        // ========== LISTEN TO ROOM UPDATES ==========
+        function listenToRoom() {
+            onValue(gameState.gameRef, (snapshot) => {
+                if (!snapshot.exists()) return;
+
+                const data = snapshot.val();
+
+                // Save settings from room data
+                if (data.settings && !gameState.settings) {
+                    gameState.settings = data.settings;
+                }
+
+                // Update game state
+                gameState.playedCards = data.playedCards || [];
+                gameState.nextExpected = data.nextExpected;
+                gameState.mistakesMade = data.mistakesMade || 0;
+
+                // Check cooldown - if last player was this player, check if 3 seconds passed
+                if (data.lastPlayerId === gameState.playerId && data.lastMove?.timestamp) {
+                    const timeSincePlay = Date.now() - data.lastMove.timestamp;
+                    gameState.canPlay = timeSincePlay >= PLAY_COOLDOWN;
+                } else {
+                    gameState.canPlay = true;
+                }
+
+                // Check if game started or restarted
+                if (data.status === 'playing') {
+                    // Update cards from server (important for Player 2 on restart)
+                    if (gameState.playerId === 1) {
+                        gameState.myCards = data.player1?.cards || gameState.myCards;
+                    } else {
+                        gameState.myCards = data.player2?.cards || gameState.myCards;
+                    }
+
+                    showScreen('game');
+                    renderHand();
+                    updateGameUI(data);
+
+                    // Show/hide timer based on settings
+                    const timerEnabled = gameState.settings?.timerDuration > 0;
+                    elements.timerContainer.style.display = timerEnabled ? 'block' : 'none';
+
+                    // Start timer if enabled and not already running
+                    if (timerEnabled && !gameState.timerInterval && data.timerStart) {
+                        startTimer(data.timerStart);
+                    }
+
+                    // Update mistakes display
+                    updateMistakesDisplay(data);
+                }
+
+                // Check for game over
+                if (data.status === 'won' || data.status === 'lost') {
+                    showResult(data);
+                }
+
+                // Update partner status
+                const partnerConnected = gameState.playerId === 1
+                    ? data.player2?.connected
+                    : data.player1?.connected;
+                elements.partnerStatus.textContent = partnerConnected
+                    ? t('🟢 Bağlı', '🟢 Connected')
+                    : t('🔴 Bağlantı Kesildi', '🔴 Disconnected');
+            });
+        }
+
+        // ========== UPDATE MISTAKES DISPLAY ==========
+        function updateMistakesDisplay(data) {
+            const settings = gameState.settings || data.settings;
+            const mistakesAllowed = settings?.mistakesAllowed || 0;
+            const mistakesMade = data.mistakesMade || 0;
+
+            if (mistakesAllowed === 0) {
+                // Infinite mode
+                elements.mistakesValue.textContent = '∞';
+                elements.mistakesValue.classList.remove('warning', 'danger');
+            } else {
+                const remaining = mistakesAllowed - mistakesMade;
+                elements.mistakesValue.textContent = `${remaining}/${mistakesAllowed}`;
+
+                // Color coding
+                elements.mistakesValue.classList.remove('warning', 'danger');
+                if (remaining === 1) {
+                    elements.mistakesValue.classList.add('warning');
+                } else if (remaining === 0) {
+                    elements.mistakesValue.classList.add('danger');
+                }
+            }
+        }
+
+        // ========== RENDER PLAYER'S HAND ==========
+        function renderHand() {
+            elements.playerHand.innerHTML = '';
+
+            gameState.myCards.forEach(cardValue => {
+                if (!gameState.playedCards.includes(cardValue)) {
+                    const card = document.createElement('div');
+                    card.className = 'card' + (gameState.canPlay ? '' : ' cooldown');
+                    card.dataset.value = cardValue;
+                    card.innerHTML = `<span class="card-value">${cardValue}</span>`;
+                    card.addEventListener('click', () => playCard(cardValue));
+                    elements.playerHand.appendChild(card);
+                }
+            });
+
+            // Update player badge
+            elements.playerBadge.textContent = `${t('Oyuncu', 'Player')} ${gameState.playerId}`;
+            elements.playerBadge.className = `player-badge player-${gameState.playerId}`;
+        }
+
+        // ========== UPDATE GAME UI ==========
+        function updateGameUI(data) {
+            const totalCards = data.allCards?.length || 10;
+
+            // Update next expected card
+            const allPlayed = (data.playedCards?.length || 0) >= totalCards;
+            elements.nextCardNeeded.textContent = allPlayed ? '✓' : (data.nextExpected || '?');
+
+            // Update cards played count - show X/total
+            const playedCount = data.playedCards?.length || 0;
+            elements.cardsPlayedCount.textContent = playedCount;
+            // Update the total in the display
+            const cardsText = document.querySelector('.cards-played');
+            if (cardsText) {
+                cardsText.innerHTML = `<span id="cardsPlayedCount">${playedCount}</span>/${totalCards} <span data-tr="kart" data-en="cards">${t('kart', 'cards')}</span>`;
+            }
+
+            // Update pile display
+            if (playedCount > 0) {
+                const lastCard = data.playedCards[playedCount - 1];
+                elements.pile.innerHTML = `<div class="pile-card">${lastCard}</div>`;
+            }
+
+            // Update last played info
+            if (data.lastMove) {
+                elements.lastPlayedInfo.classList.remove('hidden');
+                elements.lastPlayerName.textContent = `${t('Oyuncu', 'Player')} ${data.lastMove.player}`;
+                elements.lastCardValue.textContent = data.lastMove.card;
+            }
+
+            // Re-render hand (removes played cards)
+            renderHand();
+        }
+
+        // ========== PLAY A CARD ==========
+        async function playCard(cardValue) {
+            // Check cooldown
+            if (!gameState.canPlay) {
+                return;
+            }
+
+            // Get room data for allCards and current game state
+            const snapshot = await get(gameState.gameRef);
+            if (!snapshot.exists()) return;
+            const roomData = snapshot.val();
+
+            // Check if game is already over
+            if (roomData.status === 'won' || roomData.status === 'lost') {
+                return;
+            }
+
+            const allCards = roomData.allCards || [];
+            const totalCards = allCards.length;
+            const currentPlayedCards = roomData.playedCards || [];
+            const settings = gameState.settings || {};
+            const mistakesAllowed = settings.mistakesAllowed || 0;
+            const timerEnabled = settings.timerDuration > 0;
+
+            // Get the OTHER player's unplayed cards
+            const otherPlayerId = gameState.playerId === 1 ? 2 : 1;
+            const otherPlayerCards = roomData[`player${otherPlayerId}`]?.cards || [];
+            const otherPlayerUnplayedCards = otherPlayerCards.filter(c => !currentPlayedCards.includes(c));
+
+            // Check if other player has any card SMALLER than the one being played
+            // If yes, it's a MISTAKE (they should have played first)
+            const smallerCards = otherPlayerUnplayedCards.filter(c => c < cardValue);
+            const isValid = smallerCards.length === 0;
+
+            const playedCards = [...currentPlayedCards, cardValue];
+
+            // Find the next expected card from allCards (next unplayed card in sorted order)
+            const findNextExpected = (played) => {
+                for (const card of allCards) {
+                    if (!played.includes(card)) {
+                        return card;
+                    }
+                }
+                return null; // All cards played
+            };
+
+            const newData = {
+                playedCards: playedCards,
+                lastMove: {
+                    player: gameState.playerId,
+                    card: cardValue,
+                    wasValid: isValid,
+                    timestamp: Date.now()
+                },
+                lastPlayerId: gameState.playerId,
+                nextExpected: findNextExpected(playedCards)
+            };
+
+            // Only update timer if enabled
+            if (timerEnabled) {
+                newData.timerStart = Date.now();
+            }
+
+            if (isValid) {
+                // Check for win
+                if (playedCards.length >= totalCards) {
+                    newData.status = 'won';
+                }
+            } else {
+                // MISTAKE! Other player had a smaller card
+                const smallestMissedCard = Math.min(...smallerCards);
+                const newMistakeCount = (roomData.mistakesMade || 0) + 1;
+                newData.mistakesMade = newMistakeCount;
+                newData.lastMistake = {
+                    card: cardValue,
+                    missedCard: smallestMissedCard, // The card that should have been played
+                    player: gameState.playerId
+                };
+
+                if (mistakesAllowed === 0) {
+                    // Infinite mode - don't end game, just continue
+                    // Check for win even after mistake in infinite mode
+                    if (playedCards.length >= totalCards) {
+                        newData.status = 'won';
+                    }
+                } else if (newMistakeCount >= mistakesAllowed) {
+                    // Out of mistakes - game over
+                    newData.status = 'lost';
+                    newData.mistakeCard = cardValue;
+                    newData.expectedCard = smallestMissedCard; // Show what card was missed
+                } else {
+                    // Still have mistakes left - continue but card is played
+                    // Check for win
+                    if (playedCards.length >= totalCards) {
+                        newData.status = 'won';
+                    }
+                }
+            }
+
+            try {
+                // Set cooldown state locally immediately
+                gameState.canPlay = false;
+                gameState.lastPlayTime = Date.now();
+                renderHand(); // Re-render to show cooldown state
+
+                await update(gameState.gameRef, newData);
+
+                // Auto-unlock after cooldown period (local timer as backup)
+                setTimeout(() => {
+                    gameState.canPlay = true;
+                    renderHand(); // Re-render to remove cooldown state
+                }, PLAY_COOLDOWN);
+
+                // Reset timer if enabled
+                if (timerEnabled) {
+                    if (gameState.timerInterval) {
+                        clearInterval(gameState.timerInterval);
+                        gameState.timerInterval = null;
+                    }
+                    startTimer(Date.now());
+                }
+            } catch (error) {
+                console.error('Error playing card:', error);
+                // Restore ability to play on error
+                gameState.canPlay = true;
+                renderHand();
+            }
+        }
+
+        // ========== TIMER ==========
+        function startTimer(startTime) {
+            const timerDuration = gameState.settings?.timerDuration || 15;
+
+            // Don't start timer if disabled
+            if (timerDuration <= 0) return;
+
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+            }
+
+            const circumference = 2 * Math.PI * 45;
+            elements.timerProgress.style.strokeDasharray = circumference;
+
+            gameState.timerInterval = setInterval(() => {
+                const elapsed = (Date.now() - startTime) / 1000;
+                const remaining = Math.max(0, timerDuration - elapsed);
+
+                elements.timerText.textContent = Math.ceil(remaining);
+
+                // Update progress ring
+                const progress = remaining / timerDuration;
+                const offset = circumference * (1 - progress);
+                elements.timerProgress.style.strokeDashoffset = offset;
+
+                // Color change as time runs out
+                if (remaining <= 5) {
+                    elements.timerProgress.classList.add('warning');
+                } else {
+                    elements.timerProgress.classList.remove('warning');
+                }
+
+                // Time's up
+                if (remaining <= 0) {
+                    clearInterval(gameState.timerInterval);
+                    gameState.timerInterval = null;
+
+                    // Only host triggers timeout, and only if game is still playing
+                    if (gameState.isHost && gameState.gameRef) {
+                        get(gameState.gameRef).then(snapshot => {
+                            if (snapshot.exists()) {
+                                const data = snapshot.val();
+                                // Only trigger timeout if game is still playing
+                                if (data.status === 'playing') {
+                                    update(gameState.gameRef, {
+                                        status: 'lost',
+                                        reason: 'timeout'
+                                    });
+                                }
+                            }
+                        });
+                    }
+                }
+            }, 100);
+        }
+
+        // ========== SHOW RESULT ==========
+        function showResult(data) {
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+                gameState.timerInterval = null;
+            }
+
+            showScreen('result');
+
+            const totalCards = data.allCards?.length || 10;
+
+            if (data.status === 'won') {
+                elements.resultIcon.textContent = '🏆';
+                elements.resultTitle.textContent = t('Mükemmel Uyum!', 'Perfect Sync!');
+                elements.resultMessage.textContent = t(
+                    `Tüm ${totalCards} kartı uyum içinde oynadınız!`,
+                    `You played all ${totalCards} cards in harmony!`
+                );
+                elements.statMistakeCard.textContent = '-';
+                document.body.classList.add('victory');
+            } else {
+                elements.resultIcon.textContent = '💔';
+                elements.resultTitle.textContent = t('Uyumsuzluk', 'Out of Sync');
+
+                if (data.reason === 'timeout') {
+                    elements.resultMessage.textContent = t('Süre doldu! Çok tereddüt ettiniz.', 'Time ran out! You hesitated too long.');
+                    elements.statMistakeCard.textContent = '⏰';
+                } else {
+                    elements.resultMessage.textContent = t(
+                        `${data.mistakeCard} oynandı, ama partnerin ${data.expectedCard} kartı vardı!`,
+                        `Card ${data.mistakeCard} was played, but partner had ${data.expectedCard}!`
+                    );
+                    elements.statMistakeCard.textContent = `${data.mistakeCard} vs ${data.expectedCard}`;
+                }
+                document.body.classList.remove('victory');
+            }
+
+            elements.statCardsPlayed.textContent = data.playedCards?.length || 0;
+        }
+
+        // ========== PLAY AGAIN ==========
+        async function playAgain() {
+            if (!gameState.gameRef) {
+                // If no room, go back to lobby
+                showScreen('lobby');
+                return;
+            }
+
+            // Only host reshuffles and restarts the game
+            if (gameState.isHost) {
+                const settings = gameState.settings;
+                const cards = shuffleAndDeal(settings);
+
+                // Reset the game in the same room
+                const resetData = {
+                    status: 'playing',
+                    player1: {
+                        cards: cards.player1,
+                        connected: true
+                    },
+                    player2: {
+                        cards: cards.player2,
+                        connected: true // Assume still connected
+                    },
+                    allCards: cards.allCards,
+                    playedCards: [],
+                    nextExpected: cards.allCards[0],
+                    mistakesMade: 0,
+                    lastMove: null,
+                    lastPlayerId: null,
+                    timerStart: settings.timerDuration > 0 ? Date.now() : null
+                };
+
+                gameState.myCards = cards.player1;
+                gameState.playedCards = [];
+                gameState.nextExpected = cards.allCards[0];
+                gameState.mistakesMade = 0;
+                gameState.canPlay = true;
+                gameState.lastPlayTime = 0;
+
+                if (gameState.timerInterval) {
+                    clearInterval(gameState.timerInterval);
+                    gameState.timerInterval = null;
+                }
+
+                await update(gameState.gameRef, resetData);
+            } else {
+                // Player 2 just resets local state - cards will be updated via listener
+                gameState.playedCards = [];
+                gameState.mistakesMade = 0;
+                gameState.canPlay = true;
+                gameState.lastPlayTime = 0;
+
+                if (gameState.timerInterval) {
+                    clearInterval(gameState.timerInterval);
+                    gameState.timerInterval = null;
+                }
+                // Cards will be updated automatically when host updates Firebase
+            }
+
+            // Reset UI
+            elements.lastPlayedInfo.classList.add('hidden');
+            elements.pile.innerHTML = '<div class="pile-placeholder"><span>?</span></div>';
+            document.body.classList.remove('victory');
+
+            showScreen('game');
+        }
+
+        // ========== EVENT LISTENERS ==========
+        elements.createRoomBtn.addEventListener('click', createRoom);
+        elements.joinRoomBtn.addEventListener('click', joinRoom);
+        elements.playAgainBtn.addEventListener('click', playAgain);
+
+        // Allow Enter key to join room
+        elements.roomCodeInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') joinRoom();
+        });
+
+        // Auto-uppercase room code input
+        elements.roomCodeInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.toUpperCase();
+        });
+
+    </script>
+</body>
+
+</html>
