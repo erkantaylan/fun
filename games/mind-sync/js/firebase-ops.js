@@ -25,10 +25,45 @@ export function initFirebase(firebaseFunctions) {
 }
 
 /**
+ * Cleanup old game rooms (older than 2 hours)
+ * Called automatically when creating a new room
+ */
+async function cleanupOldRooms() {
+    try {
+        const twoHoursAgo = Date.now() - (2 * 60 * 60 * 1000);
+        const gamesRef = ref(db, 'games');
+        const snapshot = await get(gamesRef);
+
+        if (snapshot.exists()) {
+            const games = snapshot.val();
+            const deletePromises = [];
+
+            for (const [code, game] of Object.entries(games)) {
+                if (game.createdAt && game.createdAt < twoHoursAgo) {
+                    console.log(`[Cleanup] Deleting old room: ${code}`);
+                    deletePromises.push(remove(ref(db, `games/${code}`)));
+                }
+            }
+
+            if (deletePromises.length > 0) {
+                await Promise.all(deletePromises);
+                console.log(`[Cleanup] Deleted ${deletePromises.length} old rooms`);
+            }
+        }
+    } catch (error) {
+        console.warn('[Cleanup] Error cleaning old rooms:', error);
+        // Don't block room creation if cleanup fails
+    }
+}
+
+/**
  * Create a new game room
  * @param {string} roomCode - The room code to use
  */
 export async function createRoom(roomCode) {
+    // Clean up old rooms first (runs in background-ish)
+    await cleanupOldRooms();
+
     const cards = shuffleAndDeal();
 
     updateGameState({
