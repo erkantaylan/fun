@@ -419,10 +419,21 @@
                 [gameDeck[i], gameDeck[j]] = [gameDeck[j], gameDeck[i]];
             }
 
+            // Distribute cards to players (take separate slices before any sorting)
+            const player1Cards = gameDeck.slice(0, cardsPerPlayer);
+            const player2Cards = gameDeck.slice(cardsPerPlayer, totalNeeded);
+
+            // Sort each player's hand
+            player1Cards.sort((a, b) => a - b);
+            player2Cards.sort((a, b) => a - b);
+
+            // Create sorted list of all cards for game tracking
+            const allCards = [...gameDeck].sort((a, b) => a - b);
+
             return {
-                player1: gameDeck.slice(0, cardsPerPlayer).sort((a, b) => a - b),
-                player2: gameDeck.slice(cardsPerPlayer, totalNeeded).sort((a, b) => a - b),
-                allCards: gameDeck.sort((a, b) => a - b) // Sorted list of all cards in game
+                player1: player1Cards,
+                player2: player2Cards,
+                allCards: allCards
             };
         }
 
@@ -580,8 +591,15 @@
                     gameState.canPlay = true;
                 }
 
-                // Check if game started
+                // Check if game started or restarted
                 if (data.status === 'playing') {
+                    // Update cards from server (important for Player 2 on restart)
+                    if (gameState.playerId === 1) {
+                        gameState.myCards = data.player1?.cards || gameState.myCards;
+                    } else {
+                        gameState.myCards = data.player2?.cards || gameState.myCards;
+                    }
+
                     showScreen('game');
                     renderHand();
                     updateGameUI(data);
@@ -786,8 +804,15 @@
                 // Set cooldown state locally immediately
                 gameState.canPlay = false;
                 gameState.lastPlayTime = Date.now();
+                renderHand(); // Re-render to show cooldown state
 
                 await update(gameState.gameRef, newData);
+
+                // Auto-unlock after cooldown period (local timer as backup)
+                setTimeout(() => {
+                    gameState.canPlay = true;
+                    renderHand(); // Re-render to remove cooldown state
+                }, PLAY_COOLDOWN);
 
                 // Reset timer if enabled
                 if (timerEnabled) {
@@ -799,6 +824,9 @@
                 }
             } catch (error) {
                 console.error('Error playing card:', error);
+                // Restore ability to play on error
+                gameState.canPlay = true;
+                renderHand();
             }
         }
 
@@ -934,18 +962,17 @@
 
                 await update(gameState.gameRef, resetData);
             } else {
-                // Player 2 just waits - game state will update via listener
-                // But update their local cards when new game data arrives
-                const snapshot = await get(gameState.gameRef);
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    gameState.myCards = data.player2?.cards || [];
-                    gameState.playedCards = [];
-                    gameState.nextExpected = data.nextExpected;
-                    gameState.mistakesMade = 0;
-                    gameState.canPlay = true;
-                    gameState.lastPlayTime = 0;
+                // Player 2 just resets local state - cards will be updated via listener
+                gameState.playedCards = [];
+                gameState.mistakesMade = 0;
+                gameState.canPlay = true;
+                gameState.lastPlayTime = 0;
+
+                if (gameState.timerInterval) {
+                    clearInterval(gameState.timerInterval);
+                    gameState.timerInterval = null;
                 }
+                // Cards will be updated automatically when host updates Firebase
             }
 
             // Reset UI
