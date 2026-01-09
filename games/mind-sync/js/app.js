@@ -21,8 +21,12 @@ import {
     showResult,
     startTimer,
     resetUI,
-    setTimerUpdateFn
+    setTimerUpdateFn,
+    showMistakeToast
 } from './ui.js';
+
+// Track last known mistake to detect new mistakes
+let lastKnownMistakeCount = 0;
 
 // ========== INITIALIZE ==========
 export async function init(firebaseFunctions) {
@@ -213,6 +217,13 @@ function handleRoomUpdate(data) {
 
         // Update mistakes display
         updateMistakesDisplay(data);
+
+        // Check for new mistake and show toast
+        const currentMistakes = data.mistakesMade || 0;
+        if (currentMistakes > lastKnownMistakeCount && data.lastMistake) {
+            showMistakeToast(data.lastMistake.card, data.lastMistake.missedCard);
+        }
+        lastKnownMistakeCount = currentMistakes;
     }
 
     // Check for game over
@@ -245,6 +256,7 @@ async function handlePlayAgain() {
         return;
     }
 
+    lastKnownMistakeCount = 0; // Reset mistake counter
     await restartGame();
     resetUI();
     showScreen('game');

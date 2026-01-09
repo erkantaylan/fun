@@ -91,22 +91,25 @@ export function validateCardPlay(cardValue, playerId, roomData) {
 
     // Get the OTHER player's unplayed cards
     const otherPlayerId = playerId === 1 ? 2 : 1;
-    const otherPlayerCards = roomData[`player${otherPlayerId}`]?.cards || [];
+    const otherPlayerData = roomData[`player${otherPlayerId}`];
+    const otherPlayerCards = otherPlayerData?.cards || [];
     const otherPlayerUnplayedCards = otherPlayerCards.filter(c => !currentPlayedCards.includes(c));
 
     // Check if other player has any card SMALLER than the one being played
     const smallerCards = otherPlayerUnplayedCards.filter(c => c < cardValue);
     const isValid = smallerCards.length === 0;
 
-    console.log('[VALIDATE]', {
-        cardValue,
-        playerId,
-        otherPlayerId,
-        otherPlayerCards,
-        otherPlayerUnplayedCards,
-        smallerCards,
-        isValid
-    });
+    console.log('=== VALIDATION DEBUG ===');
+    console.log('Card being played:', cardValue);
+    console.log('My player ID:', playerId);
+    console.log('Other player ID:', otherPlayerId);
+    console.log('Other player data from Firebase:', otherPlayerData);
+    console.log('Other player cards:', otherPlayerCards);
+    console.log('Already played cards:', currentPlayedCards);
+    console.log('Other player unplayed cards:', otherPlayerUnplayedCards);
+    console.log('Smaller cards (should trigger mistake if not empty):', smallerCards);
+    console.log('IS VALID:', isValid);
+    console.log('========================');
 
     return { isValid, smallerCards };
 }

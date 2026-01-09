@@ -574,6 +574,68 @@ body.victory {
     font-weight: 600;
 }
 
+/* ========== MISTAKE TOAST ========== */
+.mistake-toast {
+    position: fixed;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+}
+
+.mistake-toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    animation: shake 0.5s ease;
+}
+
+.mistake-toast-content {
+    background: linear-gradient(135deg, #ff4757, #c0392b);
+    padding: 15px 25px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 10px 40px rgba(255, 71, 87, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.mistake-icon {
+    font-size: 1.5rem;
+}
+
+.mistake-text {
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+        transform: translateX(calc(-50% - 5px)) translateY(0);
+    }
+
+    20%,
+    40%,
+    60%,
+    80% {
+        transform: translateX(calc(-50% + 5px)) translateY(0);
+    }
+}
+
 /* ========== HAND AREA ========== */
 .hand-area {
     background: var(--bg-card);

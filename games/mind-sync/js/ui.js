@@ -3,6 +3,17 @@ import { gameState, gameSettings, updateGameState, clearTimer } from './state.js
 import { elements, showScreen } from './elements.js';
 import { t } from './i18n.js';
 
+// Store the play card function for use in renderHand
+let cardClickHandler = null;
+
+/**
+ * Set the card click handler function
+ * @param {function} fn - Function to call when a card is clicked
+ */
+export function setCardClickHandler(fn) {
+    cardClickHandler = fn;
+}
+
 // ========== RENDER PLAYER'S HAND ==========
 export function renderHand() {
     elements.playerHand.innerHTML = '';
@@ -14,8 +25,11 @@ export function renderHand() {
             card.dataset.value = cardValue;
             card.innerHTML = `<span class="card-value">${cardValue}</span>`;
 
-            // We'll attach the click handler in app.js after importing playCard
-            card.dataset.cardValue = cardValue;
+            // Attach click handler directly
+            if (cardClickHandler) {
+                card.addEventListener('click', () => cardClickHandler(cardValue));
+            }
+
             elements.playerHand.appendChild(card);
         }
     });
@@ -26,14 +40,34 @@ export function renderHand() {
 }
 
 /**
- * Attach click handlers to cards
+ * Attach click handlers to cards (legacy, now handled in renderHand)
  * @param {function} playCardFn - The playCard function to call
  */
 export function attachCardClickHandlers(playCardFn) {
-    elements.playerHand.querySelectorAll('.card').forEach(card => {
-        const cardValue = parseInt(card.dataset.cardValue);
-        card.addEventListener('click', () => playCardFn(cardValue));
-    });
+    setCardClickHandler(playCardFn);
+}
+
+/**
+ * Show mistake notification toast
+ * @param {number} playedCard - The card that was played
+ * @param {number} missedCard - The card the partner had (not revealed)
+ */
+export function showMistakeToast(playedCard, missedCard) {
+    const text = t(
+        `Hata! ${playedCard} oynadın, ama partner daha küçük karta sahipti!`,
+        `Mistake! Played ${playedCard}, but partner had a smaller card!`
+    );
+    elements.mistakeToastText.textContent = text;
+    elements.mistakeToast.classList.remove('hidden');
+    elements.mistakeToast.classList.add('visible');
+
+    // Hide after 3 seconds
+    setTimeout(() => {
+        elements.mistakeToast.classList.remove('visible');
+        setTimeout(() => {
+            elements.mistakeToast.classList.add('hidden');
+        }, 300);
+    }, 3000);
 }
 
 // ========== UPDATE GAME UI ==========

@@ -27,6 +27,8 @@ export const elements = {
     lastCardValue: null,
     mistakesDisplay: null,
     mistakesValue: null,
+    mistakeToast: null,
+    mistakeToastText: null,
 
     // Result
     playAgainBtn: null,
@@ -79,6 +81,8 @@ export function initElements() {
     elements.lastCardValue = document.getElementById('lastCardValue');
     elements.mistakesDisplay = document.getElementById('mistakesDisplay');
     elements.mistakesValue = document.getElementById('mistakesValue');
+    elements.mistakeToast = document.getElementById('mistakeToast');
+    elements.mistakeToastText = document.getElementById('mistakeToastText');
 
     // Result
     elements.playAgainBtn = document.getElementById('playAgainBtn');
