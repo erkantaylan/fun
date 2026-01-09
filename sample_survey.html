@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BEP Planlama Veli Görüşme Formu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            padding: 50px;
+        }
+
+        .form-section {
+            margin-bottom: 60px;
+        }
+
+        .basic-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 60px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #4CAF50;
+        }
+
+        .basic-info-full {
+            grid-column: 1 / -1;
+        }
+
+        .input-group {
+            margin-bottom: 40px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.3rem;
+            border: 3px solid #e0e0e0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .question-card {
+            background: white;
+            border: 3px solid #e8f5e8;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .question-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            border-color: #4CAF50;
+        }
+
+        .question-number {
+            display: inline-block;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 50px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+        }
+
+        .question-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .question-subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 30px;
+            font-style: italic;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .answer-area {
+            position: relative;
+        }
+
+        .answer-area textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 25px;
+            font-size: 1.3rem;
+            border: 3px solid #e0e0e0;
+            border-radius: 15px;
+            resize: vertical;
+            font-family: inherit;
+            line-height: 1.6;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .answer-area textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        .answer-area textarea::placeholder {
+            color: #999;
+            font-style: italic;
+        }
+
+        .notes-section {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 60px;
+            border: 3px solid #dee2e6;
+        }
+
+        .notes-section h3 {
+            font-size: 1.8rem;
+            color: #495057;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .notes-section textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 25px;
+            font-size: 1.2rem;
+            border: 2px solid #ced4da;
+            border-radius: 15px;
+            resize: vertical;
+            font-family: inherit;
+            background: white;
+        }
+
+        .submit-section {
+            text-align: center;
+            margin-top: 60px;
+            padding: 40px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 20px 60px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(76, 175, 80, 0.4);
+            background: linear-gradient(135deg, #45a049, #4CAF50);
+        }
+
+        .submit-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            transition: width 0.3s ease;
+            z-index: 1000;
+        }
+
+        @media (max-width: 768px) {
+            .basic-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-container {
+                padding: 30px 20px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .question-card {
+                padding: 30px 20px;
+            }
+        }
+
+        .floating-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .floating-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(76, 175, 80, 0.1);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-circle:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-circle:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            top: 20%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+
+        .floating-circle:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+    
+    <div class="floating-elements">
+        <div class="floating-circle"></div>
+        <div class="floating-circle"></div>
+        <div class="floating-circle"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>BEP Planlama Veli Görüşme Formu</h1>
+            <p>Çocuğunuzun eğitim planlaması için görüşlerinizi paylaşın</p>
+        </div>
+
+        <div class="form-container">
+            <form id="bepForm">
+                <div class="basic-info">
+                    <div class="input-group">
+                        <label for="studentName">Öğrenci Adı:</label>
+                        <input type="text" id="studentName" name="studentName" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="birthDate">Doğum Tarihi:</label>
+                        <input type="date" id="birthDate" name="birthDate" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="module">Modülü:</label>
+                        <input type="text" id="module" name="module">
+                    </div>
+                    <div class="input-group">
+                        <label for="formDate">Formun Doldurulma Tarihi:</label>
+                        <input type="date" id="formDate" name="formDate" required>
+                    </div>
+                    <div class="input-group basic-info-full">
+                        <label for="parentName">Veli/Velayet Sahibinin Adı:</label>
+                        <input type="text" id="parentName" name="parentName" required>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <div class="question-number">1</div>
+                    <div class="question-title">Çocuğunuzun en güçlü yönleri nelerdir?</div>
+                    <div class="question-subtitle">
+                        (Akademik, sosyal, duygusal, iletişimsel, motor beceriler ya da sizin için önemli olan diğer beceriler dahil edilebilir.)
+                    </div>
+                    <div class="answer-area">
+                        <textarea name="question1" placeholder="Çocuğunuzun güçlü yönlerini detaylı bir şekilde açıklayın..."></textarea>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <div class="question-number">2</div>
+                    <div class="question-title">Çocuğunuz eğitim sırasında en çok hangi alanlarda desteğe ihtiyaç duyuyor?</div>
+                    <div class="question-subtitle">
+                        (Örneğin: dikkat, okuduğunu anlama, organizasyon, davranış, sosyal etkileşim, geçişler…)
+                    </div>
+                    <div class="answer-area">
+                        <textarea name="question2" placeholder="Destek ihtiyacı duyulan alanları belirtin..."></textarea>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <div class="question-number">3</div>
+                    <div class="question-title">Geçmişte çocuğunuzun başarılı olmasına yardımcı olan stratejiler, uyarlamalar veya araçlar nelerdi?</div>
+                    <div class="question-subtitle">
+                        (Evde, önceki eğitim veya terapi seanslarında kullanılan yöntemler olabilir.)
+                    </div>
+                    <div class="answer-area">
+                        <textarea name="question3" placeholder="Başarılı olan stratejileri ve yöntemleri paylaşın..."></textarea>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <div class="question-number">4</div>
+                    <div class="question-title">BEP ekibiyle görüşmek istediğiniz özel bir endişeniz var mı?</div>
+                    <div class="question-subtitle">
+                        (Bu; akademik gelişim, duygusal iyilik hâli, iletişim veya davranışsal sorunlar olabilir.)
+                    </div>
+                    <div class="answer-area">
+                        <textarea name="question4" placeholder="Endişelerinizi ve sorularınızı belirtin..."></textarea>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <div class="question-number">5</div>
+                    <div class="question-title">Okul dışındaki, çocuğunuzun öğrenmesini etkileyebilecek değişiklikler veya zorluklar var mı?</div>
+                    <div class="question-subtitle">
+                        (İsteğe bağlı – örnekler: sağlık sorunları, ailede değişiklikler, uyku düzeni, duygusal zorluklar.)
+                    </div>
+                    <div class="answer-area">
+                        <textarea name="question5" placeholder="Öğrenmeyi etkileyebilecek faktörleri paylaşın..."></textarea>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <div class="question-number">6</div>
+                    <div class="question-title">Çocuğunuz için beklentileriniz ve uzun vadeli hedefleriniz nelerdir?</div>
+                    <div class="question-subtitle">
+                        (Bağımsızlık, iletişim, ilişkiler, günlük yaşam becerileri ya da gelecekteki eğitim/iş yaşamı hakkında düşünün.)
+                    </div>
+                    <div class="answer-area">
+                        <textarea name="question6" placeholder="Beklentilerinizi ve hedeflerinizi açıklayın..."></textarea>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <div class="question-number">7</div>
+                    <div class="question-title">Çocuğunuzun eğitimi ve BEP sürecine nasıl dâhil olmak istersiniz?</div>
+                    <div class="question-subtitle">
+                        (İletişim tercihleriniz, evde öğrenmeye nasıl destek olmak istediğiniz gibi bilgileri paylaşabilirsiniz.)
+                    </div>
+                    <div class="answer-area">
+                        <textarea name="question7" placeholder="Sürece katılım tercihlerinizi belirtin..."></textarea>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <div class="question-number">8</div>
+                    <div class="question-title">BEP toplantısı öncesinde ekibin bilmesini istediğiniz başka bir şey var mı?</div>
+                    <div class="question-subtitle">
+                        (Çocuğunuzu daha iyi anlamamıza ve desteklememize yardımcı olacak her türlü bilgiyi paylaşabilirsiniz.)
+                    </div>
+                    <div class="answer-area">
+                        <textarea name="question8" placeholder="Ek bilgiler ve önerilerinizi paylaşın..."></textarea>
+                    </div>
+                </div>
+
+                <div class="notes-section">
+                    <h3>Notlar (Personelin kullanımı için)</h3>
+                    <textarea name="notes" placeholder="Bu alan personel tarafından doldurulacaktır..."></textarea>
+                </div>
+
+                <div class="submit-section">
+                    <button type="submit" class="submit-btn">Formu Gönder</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Progress bar functionality
+        function updateProgressBar() {
+            const form = document.getElementById('bepForm');
+            const formData = new FormData(form);
+            const totalFields = form.querySelectorAll('input[required], textarea').length;
+            let filledFields = 0;
+
+            // Count filled required fields
+            form.querySelectorAll('input[required]').forEach(input => {
+                if (input.value.trim() !== '') filledFields++;
+            });
+
+            // Count filled textareas
+            form.querySelectorAll('textarea').forEach(textarea => {
+                if (textarea.value.trim() !== '') filledFields++;
+            });
+
+            const progress = (filledFields / totalFields) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        // Add event listeners for progress tracking
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('bepForm');
+            
+            // Set today's date as default for form date
+            document.getElementById('formDate').valueAsDate = new Date();
+            
+            // Add event listeners to all form inputs
+            form.querySelectorAll('input, textarea').forEach(element => {
+                element.addEventListener('input', updateProgressBar);
+                element.addEventListener('change', updateProgressBar);
+            });
+
+            // Initial progress calculation
+            updateProgressBar();
+
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Simple validation
+                const requiredFields = form.querySelectorAll('input[required]');
+                let isValid = true;
+                
+                requiredFields.forEach(field => {
+                    if (field.value.trim() === '') {
+                        isValid = false;
+                        field.style.borderColor = '#e74c3c';
+                        field.focus();
+                    } else {
+                        field.style.borderColor = '#4CAF50';
+                    }
+                });
+
+                if (isValid) {
+                    // Simulate form submission
+                    const submitBtn = document.querySelector('.submit-btn');
+                    submitBtn.innerHTML = 'Gönderiliyor...';
+                    submitBtn.disabled = true;
+                    
+                    setTimeout(() => {
+                        alert('Form başarıyla gönderildi! Teşekkür ederiz.');
+                        submitBtn.innerHTML = 'Formu Gönder';
+                        submitBtn.disabled = false;
+                    }, 2000);
+                } else {
+                    alert('Lütfen tüm zorunlu alanları doldurun.');
+                }
+            });
+
+            // Smooth scrolling for better UX
+            document.querySelectorAll('.question-card').forEach((card, index) => {
+                card.addEventListener('click', function() {
+                    const textarea = this.querySelector('textarea');
+                    if (textarea) {
+                        textarea.focus();
+                    }
+                });
+            });
+
+            // Auto-resize textareas
+            document.querySelectorAll('textarea').forEach(textarea => {
+                textarea.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = this.scrollHeight + 'px';
+                });
+            });
+        });
+
+        // Add some interactive feedback
+        document.querySelectorAll('.question-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>
