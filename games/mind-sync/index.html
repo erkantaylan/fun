@@ -729,15 +729,22 @@
 
             const allCards = roomData.allCards || [];
             const totalCards = allCards.length;
-            const currentNextExpected = roomData.nextExpected; // Get from server, not local state
-
-            // Check if it's a valid move (compare with server's nextExpected)
-            const isValid = cardValue === currentNextExpected;
+            const currentPlayedCards = roomData.playedCards || [];
             const settings = gameState.settings || {};
             const mistakesAllowed = settings.mistakesAllowed || 0;
             const timerEnabled = settings.timerDuration > 0;
 
-            const playedCards = [...gameState.playedCards, cardValue];
+            // Get the OTHER player's unplayed cards
+            const otherPlayerId = gameState.playerId === 1 ? 2 : 1;
+            const otherPlayerCards = roomData[`player${otherPlayerId}`]?.cards || [];
+            const otherPlayerUnplayedCards = otherPlayerCards.filter(c => !currentPlayedCards.includes(c));
+
+            // Check if other player has any card SMALLER than the one being played
+            // If yes, it's a MISTAKE (they should have played first)
+            const smallerCards = otherPlayerUnplayedCards.filter(c => c < cardValue);
+            const isValid = smallerCards.length === 0;
+
+            const playedCards = [...currentPlayedCards, cardValue];
 
             // Find the next expected card from allCards (next unplayed card in sorted order)
             const findNextExpected = (played) => {
@@ -755,9 +762,10 @@
                     player: gameState.playerId,
                     card: cardValue,
                     wasValid: isValid,
-                    timestamp: Date.now() // For cooldown tracking
+                    timestamp: Date.now()
                 },
-                lastPlayerId: gameState.playerId // Track who played last
+                lastPlayerId: gameState.playerId,
+                nextExpected: findNextExpected(playedCards)
             };
 
             // Only update timer if enabled
@@ -766,26 +774,23 @@
             }
 
             if (isValid) {
-                newData.nextExpected = findNextExpected(playedCards);
-
                 // Check for win
                 if (playedCards.length >= totalCards) {
                     newData.status = 'won';
                 }
             } else {
-                // MISTAKE!
+                // MISTAKE! Other player had a smaller card
+                const smallestMissedCard = Math.min(...smallerCards);
                 const newMistakeCount = (roomData.mistakesMade || 0) + 1;
                 newData.mistakesMade = newMistakeCount;
                 newData.lastMistake = {
                     card: cardValue,
-                    expected: currentNextExpected,
+                    missedCard: smallestMissedCard, // The card that should have been played
                     player: gameState.playerId
                 };
 
                 if (mistakesAllowed === 0) {
                     // Infinite mode - don't end game, just continue
-                    newData.nextExpected = findNextExpected(playedCards);
-
                     // Check for win even after mistake in infinite mode
                     if (playedCards.length >= totalCards) {
                         newData.status = 'won';
@@ -794,11 +799,9 @@
                     // Out of mistakes - game over
                     newData.status = 'lost';
                     newData.mistakeCard = cardValue;
-                    newData.expectedCard = currentNextExpected;
+                    newData.expectedCard = smallestMissedCard; // Show what card was missed
                 } else {
                     // Still have mistakes left - continue but card is played
-                    newData.nextExpected = findNextExpected(playedCards);
-
                     // Check for win
                     if (playedCards.length >= totalCards) {
                         newData.status = 'won';
@@ -921,10 +924,10 @@
                     elements.statMistakeCard.textContent = '⏰';
                 } else {
                     elements.resultMessage.textContent = t(
-                        `${data.mistakeCard} kartı oynandı, ama ${data.expectedCard} gerekiyordu.`,
-                        `Card ${data.mistakeCard} was played, but ${data.expectedCard} was needed.`
+                        `${data.mistakeCard} oynandı, ama partnerin ${data.expectedCard} kartı vardı!`,
+                        `Card ${data.mistakeCard} was played, but partner had ${data.expectedCard}!`
                     );
-                    elements.statMistakeCard.textContent = data.mistakeCard;
+                    elements.statMistakeCard.textContent = `${data.mistakeCard} vs ${data.expectedCard}`;
                 }
                 document.body.classList.remove('victory');
             }
