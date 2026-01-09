@@ -714,19 +714,25 @@
         async function playCard(cardValue) {
             // Check cooldown
             if (!gameState.canPlay) {
-                // Show feedback that player is in cooldown
                 return;
             }
 
-            // Get room data for allCards
+            // Get room data for allCards and current game state
             const snapshot = await get(gameState.gameRef);
             if (!snapshot.exists()) return;
             const roomData = snapshot.val();
+
+            // Check if game is already over
+            if (roomData.status === 'won' || roomData.status === 'lost') {
+                return;
+            }
+
             const allCards = roomData.allCards || [];
             const totalCards = allCards.length;
+            const currentNextExpected = roomData.nextExpected; // Get from server, not local state
 
-            // Check if it's a valid move
-            const isValid = cardValue === gameState.nextExpected;
+            // Check if it's a valid move (compare with server's nextExpected)
+            const isValid = cardValue === currentNextExpected;
             const settings = gameState.settings || {};
             const mistakesAllowed = settings.mistakesAllowed || 0;
             const timerEnabled = settings.timerDuration > 0;
@@ -768,11 +774,11 @@
                 }
             } else {
                 // MISTAKE!
-                const newMistakeCount = (gameState.mistakesMade || 0) + 1;
+                const newMistakeCount = (roomData.mistakesMade || 0) + 1;
                 newData.mistakesMade = newMistakeCount;
                 newData.lastMistake = {
                     card: cardValue,
-                    expected: gameState.nextExpected,
+                    expected: currentNextExpected,
                     player: gameState.playerId
                 };
 
@@ -788,7 +794,7 @@
                     // Out of mistakes - game over
                     newData.status = 'lost';
                     newData.mistakeCard = cardValue;
-                    newData.expectedCard = gameState.nextExpected;
+                    newData.expectedCard = currentNextExpected;
                 } else {
                     // Still have mistakes left - continue but card is played
                     newData.nextExpected = findNextExpected(playedCards);
@@ -865,11 +871,21 @@
                 // Time's up
                 if (remaining <= 0) {
                     clearInterval(gameState.timerInterval);
-                    // Only host triggers timeout
-                    if (gameState.isHost) {
-                        update(gameState.gameRef, {
-                            status: 'lost',
-                            reason: 'timeout'
+                    gameState.timerInterval = null;
+
+                    // Only host triggers timeout, and only if game is still playing
+                    if (gameState.isHost && gameState.gameRef) {
+                        get(gameState.gameRef).then(snapshot => {
+                            if (snapshot.exists()) {
+                                const data = snapshot.val();
+                                // Only trigger timeout if game is still playing
+                                if (data.status === 'playing') {
+                                    update(gameState.gameRef, {
+                                        status: 'lost',
+                                        reason: 'timeout'
+                                    });
+                                }
+                            }
                         });
                     }
                 }
@@ -880,6 +896,7 @@
         function showResult(data) {
             if (gameState.timerInterval) {
                 clearInterval(gameState.timerInterval);
+                gameState.timerInterval = null;
             }
 
             showScreen('result');
