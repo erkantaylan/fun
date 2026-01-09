@@ -6,7 +6,8 @@
             "args": [
                 "run",
                 "--project",
-                "D:/Projects/McpDemos/Mcp1/Mcp1.csproj"
+                "D:/Projects/McpDemos/Mcp1/Mcp1.csproj",
+                "--no-build",
             ],
             "env": {}
         }
