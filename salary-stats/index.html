@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Türkiye Yazılım Sektörü Maaş Analizi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 100%);
+            min-height: 100vh;
+            color: #e8e8e8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.8em;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #ffc107, #ff9800);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 1.1em;
+            margin-bottom: 50px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 35px 25px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #64748b, #94a3b8);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card.denizli::before {
+            background: linear-gradient(90deg, #ffc107, #ff9800);
+        }
+
+        .card.denizli {
+            border-color: rgba(255, 193, 7, 0.3);
+        }
+
+        .card.denizli:hover {
+            border-color: rgba(255, 193, 7, 0.5);
+        }
+
+        .card-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            font-size: 1.4em;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+
+        .card.denizli h2 {
+            color: #ffc107;
+        }
+
+        .card p {
+            color: #888;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .card .arrow {
+            margin-top: 20px;
+            font-size: 1.5em;
+            color: #64748b;
+            transition: transform 0.3s;
+        }
+
+        .card:hover .arrow {
+            transform: translateX(5px);
+        }
+
+        .card.denizli .arrow {
+            color: #ffc107;
+        }
+
+        .footer {
+            margin-top: 50px;
+        }
+
+        .footer a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 12px 24px;
+            border-radius: 10px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.1em;
+            transition: all 0.2s;
+        }
+
+        .footer a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .footer .note {
+            color: #555;
+            font-size: 0.85em;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>📊 Maaş Analizi</h1>
+        <p class="subtitle">Türkiye yazılım sektörü maaş karşılaştırması (2023-2025)</p>
+
+        <div class="cards">
+            <a href="denizli-comparison.html" class="card denizli">
+                <div class="card-icon">🎯</div>
+                <h2>Denizli Karşılaştırma</h2>
+                <p>Denizli maaşlarını İstanbul, Ankara, İzmir ve diğer büyük şehirlerle karşılaştır. Team Lead, Back-end
+                    ve Full Stack pozisyonları.</p>
+                <div class="arrow">→</div>
+            </a>
+
+            <a href="salary-analysis.html" class="card">
+                <div class="card-icon">📈</div>
+                <h2>Genel Analiz</h2>
+                <p>Tüm şehirler ve pozisyonlar için detaylı ortalama maaş analizi. Yıllara göre trend ve filtreler.</p>
+                <div class="arrow">→</div>
+            </a>
+
+            <a href="median-analysis.html" class="card">
+                <div class="card-icon">📐</div>
+                <h2>Medyan Analizi</h2>
+                <p>Aykırı değerlerden etkilenmeyen medyan maaş analizi. 20+ kayıt bulunan şehirler için güvenilir
+                    veriler.</p>
+                <div class="arrow">→</div>
+            </a>
+        </div>
+
+        <div class="footer">
+            <a href="https://github.com/oncekiyazilimci" target="_blank">
+                📂 Veri Kaynağı: github.com/oncekiyazilimci
+            </a>
+            <p class="note">2023-2025 verileri</p>
+        </div>
+    </div>
+</body>
+
+</html>

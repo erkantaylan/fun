@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Türkiye Yazılım Sektörü Maaş Analizi</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="data2023.js"></script>
+    <script src="data2024.js"></script>
+    <script src="data2025.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #e8e8e8;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #00d4ff;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 30px;
+            font-size: 0.95em;
+        }
+        .loading-section {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+        .loading-section h2 {
+            color: #00d4ff;
+            margin-bottom: 20px;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(0,212,255,0.2);
+            border-top-color: #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .load-status {
+            color: #888;
+            font-size: 0.9em;
+        }
+        .load-status .done { color: #4caf50; }
+        .load-status .loading { color: #ffc107; }
+        .load-status .error { color: #f44336; }
+        .filters {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .filter-group label {
+            font-size: 0.85em;
+            color: #aaa;
+        }
+        select, input {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            background: #2a2a4a;
+            color: #fff;
+            font-size: 0.95em;
+            min-width: 150px;
+        }
+        select:focus, input:focus {
+            outline: none;
+            border-color: #00d4ff;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .stat-card h3 {
+            color: #888;
+            font-size: 0.85em;
+            margin-bottom: 8px;
+        }
+        .stat-card .value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+        .stat-card .sub {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+        }
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .chart-container {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .chart-container h2 {
+            color: #00d4ff;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .comparison-table th, .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .comparison-table th {
+            background: rgba(0,212,255,0.1);
+            color: #00d4ff;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+        .comparison-table th:hover {
+            background: rgba(0,212,255,0.2);
+        }
+        .comparison-table th .sort-icon {
+            margin-left: 5px;
+            opacity: 0.5;
+        }
+        .comparison-table th.sorted .sort-icon {
+            opacity: 1;
+        }
+        .comparison-table tr:hover {
+            background: rgba(255,255,255,0.03);
+        }
+        .highlight-row {
+            background: rgba(0,212,255,0.15) !important;
+        }
+        .highlight-row td {
+            color: #00d4ff;
+            font-weight: 600;
+        }
+        .diff-positive { color: #4caf50; }
+        .diff-negative { color: #f44336; }
+        .error-box {
+            background: rgba(244,67,54,0.2);
+            border: 1px solid #f44336;
+            padding: 20px;
+            border-radius: 8px;
+            color: #f44336;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .year-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .year-tab {
+            padding: 10px 25px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .year-tab:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .year-tab.active {
+            background: rgba(0,212,255,0.2);
+            border-color: #00d4ff;
+            color: #00d4ff;
+        }
+        .denizli-focus {
+            background: linear-gradient(135deg, rgba(255,193,7,0.1), rgba(255,152,0,0.1));
+            border: 1px solid rgba(255,193,7,0.3);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+        .denizli-focus h2 {
+            color: #ffc107;
+            margin-bottom: 15px;
+        }
+        #analysisSection {
+            display: none;
+        }
+        .city-comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+        .city-card {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .city-card.highlight {
+            background: rgba(255,193,7,0.15);
+            border: 1px solid rgba(255,193,7,0.3);
+        }
+        .city-card h4 {
+            color: #00d4ff;
+            margin-bottom: 10px;
+        }
+        .city-card .avg-salary {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #fff;
+        }
+        .city-card .count {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 5px;
+        }
+        .city-card .diff {
+            margin-top: 8px;
+            font-size: 0.9em;
+        }
+        @media (max-width: 500px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Türkiye Yazılım Sektörü Maaş Analizi</h1>
+        <p class="subtitle">oncekiyazilimci.com verilerine dayalı karşılaştırmalı analiz (2023-2025)</p>
+
+        <div style="text-align: center; margin-bottom: 20px;">
+            <a href="median-analysis.html" style="display: inline-block; background: linear-gradient(135deg, #26a69a, #00897b); color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: transform 0.2s, box-shadow 0.2s;">
+                Medyan Analizi Sayfasına Git →
+            </a>
+        </div>
+
+        <div class="loading-section" id="loadingSection">
+            <div class="spinner"></div>
+            <h2>Veriler Yükleniyor...</h2>
+            <div class="load-status" id="loadStatus">
+                <div id="status2023">2023 verileri yükleniyor...</div>
+                <div id="status2024">2024 verileri bekleniyor...</div>
+                <div id="status2025">2025 verileri bekleniyor...</div>
+            </div>
+        </div>
+
+        <div id="errorSection" style="display:none;">
+            <div class="error-box">
+                <h3>Veri Yükleme Hatası</h3>
+                <p id="errorMessage"></p>
+                <p style="margin-top:10px;font-size:0.9em;">data2023.js, data2024.js, data2025.js dosyalarının aynı klasörde olduğunu kontrol edin.</p>
+            </div>
+        </div>
+
+        <div id="analysisSection">
+            <div class="year-tabs">
+                <div class="year-tab" data-year="all">Tüm Yıllar</div>
+                <div class="year-tab" data-year="2023">2023</div>
+                <div class="year-tab" data-year="2024">2024</div>
+                <div class="year-tab active" data-year="2025">2025</div>
+                <div class="year-tab" data-year="2026">2026 (Tahmin)</div>
+            </div>
+
+            <div class="prediction-section" style="background: rgba(255,152,0,0.1); border: 1px solid rgba(255,152,0,0.3); padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                <span style="color: #ff9800; font-weight: 500;">2026 Tahmin Ayarı:</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <label style="color: #aaa;">Maaş Artışı %</label>
+                    <input type="number" id="predictionPercent" value="27" min="0" max="200" style="width: 80px; text-align: center;">
+                    <button id="applyPrediction" style="background: #ff9800; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Uygula</button>
+                </div>
+                <span style="color: #888; font-size: 0.85em;">(2025 verilerine % artış uygulanır)</span>
+            </div>
+
+            <div class="filters">
+                <div class="filter-group">
+                    <label>Seviye</label>
+                    <select id="filterLevel">
+                        <option value="">Tümü</option>
+                        <option value="Junior">Junior</option>
+                        <option value="Middle">Middle</option>
+                        <option value="Senior">Senior</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Pozisyon</label>
+                    <select id="filterPosition">
+                        <option value="">Tümü</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Çalışma Şekli</label>
+                    <select id="filterWorkType">
+                        <option value="">Tümü</option>
+                        <option value="Remote">Remote</option>
+                        <option value="Ofis">Ofis</option>
+                        <option value="Hibrit (Ofis + Remote)">Hibrit</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Para Birimi</label>
+                    <select id="filterCurrency">
+                        <option value="TL">Sadece TL</option>
+                        <option value="">Tümü</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Toplam Kayıt</h3>
+                    <div class="value" id="totalRecords">-</div>
+                    <div class="sub" id="filteredCount"></div>
+                </div>
+                <div class="stat-card">
+                    <h3>Ortalama Maaş (TL)</h3>
+                    <div class="value" id="avgSalary">-</div>
+                    <div class="sub">Tüm şehirler</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Denizli Ortalama</h3>
+                    <div class="value" id="denizliAvg">-</div>
+                    <div class="sub" id="denizliCount"></div>
+                </div>
+                <div class="stat-card">
+                    <h3>İstanbul Ortalama</h3>
+                    <div class="value" id="istanbulAvg">-</div>
+                    <div class="sub" id="istanbulCount"></div>
+                </div>
+            </div>
+
+            <div class="denizli-focus">
+                <h2>Denizli vs Büyük Şehirler Karşılaştırması</h2>
+                <div class="city-comparison-grid" id="cityComparison"></div>
+            </div>
+
+            <div class="charts-section">
+                <div class="chart-container">
+                    <h2>Şehirlere Göre Ortalama Maaş</h2>
+                    <div class="chart-wrapper">
+                        <canvas id="citySalaryChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h2>Yıllara Göre Maaş Trendi</h2>
+                    <div class="chart-wrapper">
+                        <canvas id="yearTrendChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h2>Seviyeye Göre Dağılım</h2>
+                    <div class="chart-wrapper">
+                        <canvas id="levelChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h2>Denizli Yıllık Trend</h2>
+                    <div class="chart-wrapper">
+                        <canvas id="denizliTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container" style="margin-bottom: 25px;">
+                <h2>Detaylı Şehir Karşılaştırma Tablosu</h2>
+                <table class="comparison-table" id="comparisonTable">
+                    <thead>
+                        <tr>
+                            <th data-sort="city" data-type="string">Şehir <span class="sort-icon">↕</span></th>
+                            <th data-sort="count" data-type="number">Kayıt Sayısı <span class="sort-icon">↕</span></th>
+                            <th data-sort="avg" data-type="number" class="sorted">Ort. Maaş (TL) <span class="sort-icon">↓</span></th>
+                            <th data-sort="max" data-type="number">Max Maaş <span class="sort-icon">↕</span></th>
+                            <th data-sort="diff" data-type="number">Denizli'ye Göre Fark <span class="sort-icon">↕</span></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="chart-container">
+                <h2>Pozisyona Göre Denizli vs İstanbul</h2>
+                <table class="comparison-table" id="positionTable">
+                    <thead>
+                        <tr>
+                            <th data-sort="position" data-type="string">Pozisyon <span class="sort-icon">↕</span></th>
+                            <th data-sort="denizli" data-type="number">Denizli Ort. <span class="sort-icon">↕</span></th>
+                            <th data-sort="istanbul" data-type="number">İstanbul Ort. <span class="sort-icon">↕</span></th>
+                            <th data-sort="diff" data-type="number">Fark <span class="sort-icon">↕</span></th>
+                            <th data-sort="diffPercent" data-type="number" class="sorted">Fark % <span class="sort-icon">↓</span></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allData = [];
+        let charts = {};
+        const targetCities = ['Denizli', 'Istanbul', 'Ankara', 'Antalya', 'Izmir', 'Mugla'];
+
+        // Store table data for sorting
+        let cityTableData = [];
+        let positionTableData = [];
+        let citySortConfig = { key: 'avg', direction: 'desc' };
+        let positionSortConfig = { key: 'diffPercent', direction: 'desc' };
+        let predictionPercent = 27;
+
+        // Data sources (loaded via script tags)
+        const dataSources = {
+            2023: () => typeof data2023 !== 'undefined' ? data2023 : null,
+            2024: () => typeof data2024 !== 'undefined' ? data2024 : null,
+            2025: () => typeof data2025 !== 'undefined' ? data2025 : null
+        };
+
+        // Normalize position names (merge duplicates with different cases/typos)
+        function normalizePosition(position) {
+            if (!position) return '';
+            // Trim and normalize whitespace
+            position = position.trim().replace(/\s+/g, ' ');
+
+            // Convert to title case for comparison
+            const lower = position.toLowerCase();
+
+            // Known mappings for typos and variations
+            const mappings = {
+                'bussines intelligence': 'Business Intelligence',
+                'business intelligence': 'Business Intelligence',
+                'sap/abap': 'SAP/ABAP Developer & Consultant',
+                'sap / abap developer & consultant': 'SAP/ABAP Developer & Consultant',
+                'sap/abap developer & consultant': 'SAP/ABAP Developer & Consultant',
+                'erp': 'ERP Developer',
+                'erp developer': 'ERP Developer',
+                'erp developer & consultant': 'ERP Developer & Consultant',
+                'big data engineer': 'Big Data Engineer',
+                'blockchain developer': 'Blockchain Developer',
+                'blockchain engineer': 'Blockchain Engineer',
+                'business analyst': 'Business Analyst',
+                'computer vision engineer': 'Computer Vision Engineer',
+                'cyber security': 'Cyber Security',
+                'data engineer': 'Data Engineer',
+                'game developer': 'Game Developer',
+                'ai engineer': 'AI Engineer',
+                'ai developer': 'AI Developer',
+                'artificial / intelligence engineer': 'AI Engineer',
+                'technical analyst': 'Technical Analyst',
+                'sre': 'Site Reliability Engineer'
+            };
+
+            return mappings[lower] || position;
+        }
+
+        // Normalize city names (handle Turkish characters and encoding issues)
+        function normalizeCity(city) {
+            if (!city) return '';
+            city = city.trim();
+            // Remove foreign country prefix
+            if (city.startsWith('*')) return null;
+
+            // Normalize Turkish characters for comparison
+            const normalizations = {
+                'İstanbul': 'Istanbul',
+                'istanbul': 'Istanbul',
+                'İZMİR': 'Izmir',
+                'İzmir': 'Izmir',
+                'izmir': 'Izmir',
+                'MUĞLA': 'Mugla',
+                'Muğla': 'Mugla',
+                'mugla': 'Mugla',
+                'ESKİŞEHİR': 'Eskisehir',
+                'Eskişehir': 'Eskisehir'
+            };
+
+            return normalizations[city] || city;
+        }
+
+        // Parse salary string to number
+        function parseSalary(salaryStr) {
+            if (!salaryStr) return null;
+            // Format: "22.000 - 22.999" -> take average
+            const parts = salaryStr.replace(/\./g, '').split(' - ');
+            if (parts.length === 2) {
+                const min = parseInt(parts[0]);
+                const max = parseInt(parts[1]);
+                return (min + max) / 2;
+            }
+            return parseInt(salaryStr.replace(/\./g, ''));
+        }
+
+        // Check if currency is TL
+        function isTL(currency) {
+            if (!currency) return false;
+            return currency.includes('Türk Liras') ||
+                   currency.includes('Turk Liras') ||
+                   currency.includes('TL') ||
+                   currency.includes('₺');
+        }
+
+        // Update loading status
+        function updateStatus(year, status, message) {
+            const el = document.getElementById(`status${year}`);
+            el.className = status;
+            el.textContent = message;
+        }
+
+        // Generate 2026 predictions based on 2025 data
+        function generate2026Predictions() {
+            // Remove existing 2026 data
+            allData = allData.filter(d => d._year !== 2026);
+
+            // Get 2025 data
+            const data2025Records = allData.filter(d => d._year === 2025);
+
+            // Create 2026 predictions
+            const multiplier = 1 + (predictionPercent / 100);
+            data2025Records.forEach(record => {
+                const predicted = { ...record };
+                predicted._year = 2026;
+                predicted._salary = record._salary * multiplier;
+                predicted._isPrediction = true;
+                allData.push(predicted);
+            });
+        }
+
+        // Load all data from script tags
+        function loadAllFiles() {
+            allData = [];
+            let loadedCount = 0;
+
+            for (const [year, getData] of Object.entries(dataSources)) {
+                updateStatus(year, 'loading', `${year} verileri yükleniyor...`);
+
+                try {
+                    const json = getData();
+                    if (!json) {
+                        throw new Error('Veri bulunamadı');
+                    }
+
+                    // Handle different JSON structures (RECORDS wrapper vs direct array)
+                    const records = json.RECORDS || json;
+
+                    let recordCount = 0;
+                    records.forEach(record => {
+                        record._year = parseInt(year);
+                        record._salary = parseSalary(record.salary);
+                        record._city = normalizeCity(record.city);
+                        record._position = normalizePosition(record.position);
+                        record._isTL = isTL(record.currency);
+                        allData.push(record);
+                        recordCount++;
+                    });
+
+                    updateStatus(year, 'done', `${year}: ${recordCount.toLocaleString('tr-TR')} kayıt yüklendi`);
+                    loadedCount++;
+
+                } catch (error) {
+                    console.error(`Error loading ${year}:`, error);
+                    updateStatus(year, 'error', `${year}: Yüklenemedi (${error.message})`);
+                }
+            }
+
+            // Hide loading, show results or error
+            document.getElementById('loadingSection').style.display = 'none';
+
+            if (loadedCount === 0) {
+                document.getElementById('errorSection').style.display = 'block';
+                document.getElementById('errorMessage').textContent = 'Hiçbir veri yüklenemedi. data2023.js, data2024.js, data2025.js dosyalarının aynı klasörde olduğunu kontrol edin.';
+                return;
+            }
+
+            if (allData.length > 0) {
+                generate2026Predictions();
+                document.getElementById('analysisSection').style.display = 'block';
+                populateFilters();
+                updateAnalysis();
+            }
+        }
+
+        // Populate filter dropdowns
+        function populateFilters() {
+            const positions = [...new Set(allData.map(d => d._position))].filter(Boolean).sort();
+            const posSelect = document.getElementById('filterPosition');
+            posSelect.innerHTML = '<option value="">Tümü</option>';
+            positions.forEach(pos => {
+                const selected = pos === 'Back-end Developer' ? 'selected' : '';
+                posSelect.innerHTML += `<option value="${pos}" ${selected}>${pos}</option>`;
+            });
+        }
+
+        // Filter data based on current selections
+        function getFilteredData() {
+            const year = document.querySelector('.year-tab.active').dataset.year;
+            const level = document.getElementById('filterLevel').value;
+            const position = document.getElementById('filterPosition').value;
+            const workType = document.getElementById('filterWorkType').value;
+            const currency = document.getElementById('filterCurrency').value;
+
+            return allData.filter(d => {
+                if (year !== 'all' && d._year !== parseInt(year)) return false;
+                if (level && d.level !== level) return false;
+                if (position && d._position !== position) return false;
+                if (workType && !d.work_type?.includes(workType.split(' ')[0])) return false;
+                if (currency === 'TL' && !d._isTL) return false;
+                if (!d._salary || !d._city) return false;
+                return true;
+            });
+        }
+
+        // Calculate city statistics
+        function getCityStats(data, city) {
+            const cityData = data.filter(d => d._city === city);
+            if (cityData.length === 0) return null;
+
+            const salaries = cityData.map(d => d._salary);
+            return {
+                count: cityData.length,
+                avg: salaries.reduce((a, b) => a + b, 0) / salaries.length,
+                min: Math.min(...salaries),
+                max: Math.max(...salaries)
+            };
+        }
+
+        // Update all visualizations
+        function updateAnalysis() {
+            const data = getFilteredData();
+
+            // Update stats
+            document.getElementById('totalRecords').textContent = allData.length.toLocaleString('tr-TR');
+            document.getElementById('filteredCount').textContent = `(${data.length.toLocaleString('tr-TR')} filtrelenmiş)`;
+
+            const avgAll = data.length ? data.reduce((a, b) => a + b._salary, 0) / data.length : 0;
+            document.getElementById('avgSalary').textContent = formatCurrency(avgAll);
+
+            const denizliStats = getCityStats(data, 'Denizli');
+            const istanbulStats = getCityStats(data, 'Istanbul');
+
+            if (denizliStats) {
+                document.getElementById('denizliAvg').textContent = formatCurrency(denizliStats.avg);
+                document.getElementById('denizliCount').textContent = `${denizliStats.count} kayıt`;
+            } else {
+                document.getElementById('denizliAvg').textContent = '-';
+                document.getElementById('denizliCount').textContent = 'Veri yok';
+            }
+
+            if (istanbulStats) {
+                document.getElementById('istanbulAvg').textContent = formatCurrency(istanbulStats.avg);
+                document.getElementById('istanbulCount').textContent = `${istanbulStats.count} kayıt`;
+            } else {
+                document.getElementById('istanbulAvg').textContent = '-';
+                document.getElementById('istanbulCount').textContent = 'Veri yok';
+            }
+
+            updateCityComparison(data, denizliStats);
+            updateCharts(data);
+            updateComparisonTable(data, denizliStats);
+            updatePositionTable(data);
+        }
+
+        function formatCurrency(value) {
+            if (!value) return '-';
+            return Math.round(value).toLocaleString('tr-TR') + ' TL';
+        }
+
+        function updateCityComparison(data, denizliStats) {
+            const container = document.getElementById('cityComparison');
+            container.innerHTML = '';
+
+            const denizliAvg = denizliStats?.avg || 0;
+
+            targetCities.forEach(city => {
+                const stats = getCityStats(data, city);
+                const isHighlight = city === 'Denizli';
+
+                let diffHtml = '';
+                if (stats && denizliAvg && city !== 'Denizli') {
+                    const diff = ((stats.avg - denizliAvg) / denizliAvg * 100).toFixed(1);
+                    const diffClass = diff > 0 ? 'diff-negative' : 'diff-positive';
+                    diffHtml = `<div class="diff ${diffClass}">${diff > 0 ? '+' : ''}${diff}% fark</div>`;
+                }
+
+                container.innerHTML += `
+                    <div class="city-card ${isHighlight ? 'highlight' : ''}">
+                        <h4>${city}</h4>
+                        <div class="avg-salary">${stats ? formatCurrency(stats.avg) : '-'}</div>
+                        <div class="count">${stats ? stats.count + ' kayıt' : 'Veri yok'}</div>
+                        ${diffHtml}
+                    </div>
+                `;
+            });
+        }
+
+        function updateCharts(data) {
+            // Destroy existing charts
+            Object.values(charts).forEach(chart => chart?.destroy());
+
+            // City salary chart
+            const cityLabels = targetCities;
+            const cityAvgs = cityLabels.map(city => {
+                const stats = getCityStats(data, city);
+                return stats ? Math.round(stats.avg) : 0;
+            });
+
+            charts.city = new Chart(document.getElementById('citySalaryChart'), {
+                type: 'bar',
+                data: {
+                    labels: cityLabels,
+                    datasets: [{
+                        label: 'Ortalama Maaş (TL)',
+                        data: cityAvgs,
+                        backgroundColor: cityLabels.map(c => c === 'Denizli' ? '#ffc107' : '#00d4ff'),
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#888', callback: v => v.toLocaleString('tr-TR') },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        x: { ticks: { color: '#888' }, grid: { display: false } }
+                    }
+                }
+            });
+
+            // Year trend chart
+            const years = [2023, 2024, 2025, 2026];
+            const yearData = {};
+            targetCities.forEach(city => {
+                yearData[city] = years.map(year => {
+                    const yearCityData = data.filter(d => d._year === year && d._city === city);
+                    if (yearCityData.length === 0) return null;
+                    return Math.round(yearCityData.reduce((a, b) => a + b._salary, 0) / yearCityData.length);
+                });
+            });
+
+            const colors = ['#ffc107', '#00d4ff', '#4caf50', '#f44336', '#9c27b0', '#ff9800'];
+            charts.trend = new Chart(document.getElementById('yearTrendChart'), {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: targetCities.map((city, i) => ({
+                        label: city,
+                        data: yearData[city],
+                        borderColor: colors[i],
+                        backgroundColor: colors[i] + '33',
+                        tension: 0.3,
+                        fill: false,
+                        borderWidth: city === 'Denizli' ? 3 : 2
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#888' } } },
+                    scales: {
+                        y: {
+                            ticks: { color: '#888', callback: v => v.toLocaleString('tr-TR') },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        x: { ticks: { color: '#888' }, grid: { display: false } }
+                    }
+                }
+            });
+
+            // Level distribution
+            const levels = ['Junior', 'Middle', 'Senior'];
+            const levelAvgs = levels.map(level => {
+                const levelData = data.filter(d => d.level === level);
+                return levelData.length ? Math.round(levelData.reduce((a, b) => a + b._salary, 0) / levelData.length) : 0;
+            });
+
+            charts.level = new Chart(document.getElementById('levelChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: levels,
+                    datasets: [{
+                        data: levelAvgs,
+                        backgroundColor: ['#4caf50', '#2196f3', '#9c27b0']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#888' } },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => `${ctx.label}: ${ctx.raw.toLocaleString('tr-TR')} TL`
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Denizli trend by level
+            const denizliLevelTrend = {};
+            levels.forEach(level => {
+                denizliLevelTrend[level] = years.map(year => {
+                    const d = data.filter(r => r._year === year && r._city === 'Denizli' && r.level === level);
+                    return d.length ? Math.round(d.reduce((a, b) => a + b._salary, 0) / d.length) : null;
+                });
+            });
+
+            charts.denizli = new Chart(document.getElementById('denizliTrendChart'), {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: levels.map((level, i) => ({
+                        label: level,
+                        data: denizliLevelTrend[level],
+                        borderColor: ['#4caf50', '#2196f3', '#9c27b0'][i],
+                        tension: 0.3,
+                        fill: false
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#888' } } },
+                    scales: {
+                        y: {
+                            ticks: { color: '#888', callback: v => v.toLocaleString('tr-TR') },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        x: { ticks: { color: '#888' }, grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function updateComparisonTable(data, denizliStats) {
+            const denizliAvg = denizliStats?.avg || 0;
+
+            // Get all cities with enough data
+            const cities = [...new Set(data.map(d => d._city))].filter(Boolean);
+            cityTableData = cities.map(city => {
+                const stats = getCityStats(data, city);
+                const diff = denizliAvg && city !== 'Denizli' ? ((stats.avg - denizliAvg) / denizliAvg * 100) : 0;
+                return {
+                    city,
+                    count: stats.count,
+                    avg: stats.avg,
+                    min: stats.min,
+                    max: stats.max,
+                    diff: diff,
+                    isTarget: targetCities.includes(city),
+                    isDenizli: city === 'Denizli'
+                };
+            }).filter(s => s.count >= 5);
+
+            renderCityTable();
+        }
+
+        function renderCityTable() {
+            const tbody = document.querySelector('#comparisonTable tbody');
+            tbody.innerHTML = '';
+
+            // Sort data
+            const sorted = [...cityTableData].sort((a, b) => {
+                let aVal = a[citySortConfig.key];
+                let bVal = b[citySortConfig.key];
+                if (typeof aVal === 'string') {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+                if (citySortConfig.direction === 'asc') {
+                    return aVal > bVal ? 1 : -1;
+                }
+                return aVal < bVal ? 1 : -1;
+            });
+
+            sorted.forEach(stats => {
+                let diffHtml = '-';
+                if (stats.diff !== 0) {
+                    const diffClass = stats.diff > 0 ? 'diff-negative' : 'diff-positive';
+                    diffHtml = `<span class="${diffClass}">${stats.diff > 0 ? '+' : ''}${stats.diff.toFixed(1)}%</span>`;
+                }
+
+                tbody.innerHTML += `
+                    <tr class="${stats.isDenizli ? 'highlight-row' : ''}" style="${stats.isTarget ? 'font-weight:500;' : ''}">
+                        <td>${stats.city} ${stats.isDenizli ? '*' : ''}</td>
+                        <td>${stats.count}</td>
+                        <td>${formatCurrency(stats.avg)}</td>
+                        <td>${formatCurrency(stats.max)}</td>
+                        <td>${diffHtml}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function updatePositionTable(data) {
+            const positions = [...new Set(data.map(d => d._position))].filter(Boolean);
+            positionTableData = [];
+
+            positions.forEach(pos => {
+                const denizliData = data.filter(d => d._city === 'Denizli' && d._position === pos);
+                const istanbulData = data.filter(d => d._city === 'Istanbul' && d._position === pos);
+
+                if (denizliData.length >= 2 && istanbulData.length >= 5) {
+                    const denizliAvg = denizliData.reduce((a, b) => a + b._salary, 0) / denizliData.length;
+                    const istanbulAvg = istanbulData.reduce((a, b) => a + b._salary, 0) / istanbulData.length;
+
+                    positionTableData.push({
+                        position: pos,
+                        denizli: denizliAvg,
+                        istanbul: istanbulAvg,
+                        diff: istanbulAvg - denizliAvg,
+                        diffPercent: ((istanbulAvg - denizliAvg) / denizliAvg * 100)
+                    });
+                }
+            });
+
+            renderPositionTable();
+        }
+
+        function renderPositionTable() {
+            const tbody = document.querySelector('#positionTable tbody');
+            tbody.innerHTML = '';
+
+            if (positionTableData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#888;">Karşılaştırma için yeterli veri yok</td></tr>';
+                return;
+            }
+
+            // Sort data
+            const sorted = [...positionTableData].sort((a, b) => {
+                let aVal = a[positionSortConfig.key];
+                let bVal = b[positionSortConfig.key];
+                if (typeof aVal === 'string') {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+                if (positionSortConfig.direction === 'asc') {
+                    return aVal > bVal ? 1 : -1;
+                }
+                return aVal < bVal ? 1 : -1;
+            });
+
+            sorted.forEach(s => {
+                const diffClass = s.diff > 0 ? 'diff-negative' : 'diff-positive';
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${s.position}</td>
+                        <td>${formatCurrency(s.denizli)}</td>
+                        <td>${formatCurrency(s.istanbul)}</td>
+                        <td><span class="${diffClass}">${s.diff > 0 ? '+' : ''}${formatCurrency(Math.abs(s.diff)).replace(' TL', '')} TL</span></td>
+                        <td><span class="${diffClass}">${s.diff > 0 ? '+' : ''}${s.diffPercent.toFixed(1)}%</span></td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Event listeners
+        document.querySelectorAll('.year-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.year-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                updateAnalysis();
+            });
+        });
+
+        document.querySelectorAll('select').forEach(select => {
+            select.addEventListener('change', updateAnalysis);
+        });
+
+        // Table sorting
+        function setupTableSorting() {
+            // City comparison table sorting
+            document.querySelectorAll('#comparisonTable th[data-sort]').forEach(th => {
+                th.addEventListener('click', function() {
+                    const key = this.dataset.sort;
+
+                    // Toggle direction if same key, otherwise default to desc
+                    if (citySortConfig.key === key) {
+                        citySortConfig.direction = citySortConfig.direction === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        citySortConfig.key = key;
+                        citySortConfig.direction = 'desc';
+                    }
+
+                    // Update header icons
+                    document.querySelectorAll('#comparisonTable th').forEach(header => {
+                        header.classList.remove('sorted');
+                        header.querySelector('.sort-icon').textContent = '↕';
+                    });
+                    this.classList.add('sorted');
+                    this.querySelector('.sort-icon').textContent = citySortConfig.direction === 'asc' ? '↑' : '↓';
+
+                    renderCityTable();
+                });
+            });
+
+            // Position table sorting
+            document.querySelectorAll('#positionTable th[data-sort]').forEach(th => {
+                th.addEventListener('click', function() {
+                    const key = this.dataset.sort;
+
+                    // Toggle direction if same key, otherwise default to desc
+                    if (positionSortConfig.key === key) {
+                        positionSortConfig.direction = positionSortConfig.direction === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        positionSortConfig.key = key;
+                        positionSortConfig.direction = 'desc';
+                    }
+
+                    // Update header icons
+                    document.querySelectorAll('#positionTable th').forEach(header => {
+                        header.classList.remove('sorted');
+                        header.querySelector('.sort-icon').textContent = '↕';
+                    });
+                    this.classList.add('sorted');
+                    this.querySelector('.sort-icon').textContent = positionSortConfig.direction === 'asc' ? '↑' : '↓';
+
+                    renderPositionTable();
+                });
+            });
+        }
+
+        // Prediction controls
+        function setupPrediction() {
+            document.getElementById('applyPrediction').addEventListener('click', () => {
+                const input = document.getElementById('predictionPercent');
+                predictionPercent = parseFloat(input.value) || 27;
+                generate2026Predictions();
+                updateAnalysis();
+            });
+
+            document.getElementById('predictionPercent').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    document.getElementById('applyPrediction').click();
+                }
+            });
+        }
+
+        // Auto-load on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            setupTableSorting();
+            setupPrediction();
+            loadAllFiles();
+        });
+    </script>
+</body>
+</html>
