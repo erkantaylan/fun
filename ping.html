@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Network Monitor — Are They Down or Is It Me?</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #161922;
+    --panel-2: #1c2030;
+    --border: #262a37;
+    --text: #e6e8ee;
+    --text-dim: #8a8f9c;
+    --text-faint: #5a6070;
+    --accent: #5b8dee;
+    --good: #2dbd6e;
+    --warn: #e8a93b;
+    --bad: #e8534a;
+    --unknown: #6b7280;
+    --radius: 10px;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .app {
+    width: 100%;
+    margin: 0;
+    padding: 24px 20px 48px;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  h1 {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .subtitle { color: var(--text-dim); font-size: 13px; margin: 0; }
+
+  .controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  button, select {
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  button:hover, select:hover { background: var(--panel-2); border-color: #3a3f50; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: white; }
+  button.primary:hover { background: #4a7cd8; border-color: #4a7cd8; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .self-test {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .self-test .label {
+    font-size: 12px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .self-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+  }
+  .verdict {
+    font-size: 13px;
+    color: var(--text-dim);
+    flex: 1;
+    min-width: 200px;
+  }
+  .verdict.warning { color: var(--warn); }
+  .verdict.danger { color: var(--bad); }
+  .verdict.ok { color: var(--good); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    transition: border-color 0.15s;
+  }
+  .card.checking { border-color: var(--accent); }
+  .card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .site-name {
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .favicon {
+    width: 16px; height: 16px;
+    border-radius: 3px;
+    background: var(--panel-2);
+    flex-shrink: 0;
+  }
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .status-up    { background: rgba(45,189,110,0.15); color: var(--good); }
+  .status-up    .dot { background: var(--good); box-shadow: 0 0 8px rgba(45,189,110,0.6); }
+  .status-slow  { background: rgba(232,169,59,0.15); color: var(--warn); }
+  .status-slow  .dot { background: var(--warn); box-shadow: 0 0 8px rgba(232,169,59,0.6); }
+  .status-down  { background: rgba(232,83,74,0.15); color: var(--bad); }
+  .status-down  .dot { background: var(--bad); }
+  .status-pending { background: rgba(91,141,238,0.12); color: var(--accent); }
+  .status-pending .dot { background: var(--accent); animation: pulse 1s infinite; }
+  .status-unknown { background: rgba(107,114,128,0.15); color: var(--text-dim); }
+  .status-unknown .dot { background: var(--unknown); }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .latency {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text-dim);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+  .latency .num {
+    color: var(--text);
+    font-size: 20px;
+    font-weight: 500;
+  }
+  .latency .unit { color: var(--text-faint); font-size: 11px; }
+
+  .sparkline {
+    height: 36px;
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    margin-top: 4px;
+  }
+  .bar {
+    flex: 1;
+    min-width: 2px;
+    background: var(--text-faint);
+    border-radius: 1px;
+    transition: height 0.3s;
+    position: relative;
+  }
+  .bar.b-good { background: var(--good); }
+  .bar.b-slow { background: var(--warn); }
+  .bar.b-bad  { background: var(--bad); }
+  .bar.b-empty { background: rgba(107,114,128,0.2); }
+
+  .meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-faint);
+    margin-top: 8px;
+    font-family: var(--mono);
+  }
+  .data-meta { margin-top: 4px; }
+  .data-meta .real { color: var(--good); }
+
+  .totals-bar {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin-bottom: 18px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+  }
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .stat .stat-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .stat .stat-val {
+    font-size: 18px;
+    font-weight: 500;
+    font-family: var(--mono);
+    color: var(--text);
+  }
+  .stat .stat-val .unit { font-size: 11px; color: var(--text-faint); font-weight: 400; margin-left: 2px; }
+
+  .legend {
+    display: flex;
+    gap: 18px;
+    margin-top: 24px;
+    padding: 12px 16px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+
+  .note {
+    margin-top: 18px;
+    padding: 12px 16px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+  .note strong { color: var(--text); }
+
+  .toolbar-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  label.checkbox {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-dim);
+    cursor: pointer;
+  }
+  label.checkbox input { cursor: pointer; }
+
+  .category {
+    grid-column: 1 / -1;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-faint);
+    font-weight: 600;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+  .category:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    z-index: 1000;
+    padding: 40px 20px;
+    overflow-y: auto;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 640px;
+    padding: 20px 22px;
+  }
+  .modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .modal-head h2 { margin: 0; font-size: 18px; font-weight: 600; }
+  .modal-close {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    font-size: 22px;
+    line-height: 1;
+    padding: 4px 10px;
+    cursor: pointer;
+    border-radius: 6px;
+  }
+  .modal-close:hover { background: var(--panel-2); color: var(--text); }
+
+  .add-form {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1.2fr auto;
+    gap: 8px;
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .add-form input {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    min-width: 0;
+  }
+  .add-form input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .site-list {
+    max-height: 50vh;
+    overflow-y: auto;
+    margin: 0 -6px;
+    padding: 0 6px;
+  }
+  .site-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-radius: 6px;
+    gap: 10px;
+  }
+  .site-row:hover { background: var(--panel-2); }
+  .site-row .info { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+  .site-row .info img { width: 16px; height: 16px; border-radius: 3px; flex-shrink: 0; }
+  .site-row .info .name { font-weight: 500; font-size: 13px; }
+  .site-row .info .url { font-size: 11px; color: var(--text-faint); font-family: var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .site-row .cat-pill { font-size: 11px; color: var(--text-dim); background: var(--panel-2); padding: 2px 8px; border-radius: 4px; flex-shrink: 0; }
+  .site-row:hover .cat-pill { background: var(--bg); }
+  .remove-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-faint);
+    padding: 4px 9px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+  .remove-btn:hover { color: var(--bad); border-color: var(--bad); background: rgba(232,83,74,0.08); }
+
+  .modal-footer {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  @media (max-width: 560px) {
+    .add-form { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1>Network monitor</h1>
+      <p class="subtitle">Live reachability check for sites you actually use. Down or just you?</p>
+    </div>
+    <div class="controls">
+      <div class="toolbar-group">
+        <label class="checkbox">
+          <input type="checkbox" id="autoRefresh" checked>
+          Auto-refresh
+        </label>
+        <select id="interval">
+          <option value="5">5s</option>
+          <option value="15">15s</option>
+          <option value="30" selected>30s</option>
+          <option value="60">60s</option>
+          <option value="120">2m</option>
+        </select>
+      </div>
+      <button id="manageBtn">Manage sites</button>
+      <button id="refreshBtn" class="primary">Check now</button>
+    </div>
+  </header>
+
+  <div class="self-test" id="selfTest">
+    <span class="label">Your connection</span>
+    <span class="self-status" id="selfStatus">
+      <span class="dot" style="background:var(--unknown)"></span>
+      <span>Unknown</span>
+    </span>
+    <span class="verdict" id="verdict">Run a check to see whether outages are theirs or yours.</span>
+  </div>
+
+  <div class="totals-bar">
+    <div class="stat">
+      <span class="stat-label">Total data used</span>
+      <span class="stat-val" id="totalData">0<span class="unit"> KB</span></span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Per check</span>
+      <span class="stat-val" id="perCheck">0<span class="unit"> KB</span></span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Avg per site</span>
+      <span class="stat-val" id="avgPerSite">0<span class="unit"> KB</span></span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Total checks</span>
+      <span class="stat-val" id="totalChecks">0</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Session</span>
+      <span class="stat-val" id="sessionTime">0<span class="unit"> min</span></span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Projected/hour</span>
+      <span class="stat-val" id="projHour">0<span class="unit"> KB</span></span>
+    </div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="dot" style="background:var(--good)"></span> Up &lt; 600 ms</div>
+    <div class="legend-item"><span class="dot" style="background:var(--warn)"></span> Slow 600–1500 ms</div>
+    <div class="legend-item"><span class="dot" style="background:var(--bad)"></span> Down / unreachable</div>
+    <div class="legend-item"><span class="dot" style="background:var(--accent)"></span> Checking…</div>
+  </div>
+
+  <div class="note">
+    <strong>How this works:</strong> Browsers can't run real ICMP pings, so this loads each site's favicon (a tiny image) with a no-cache request and times how long the response takes. A failure means the site is unreachable from your browser — which could be the site itself, your DNS, your ISP, or a firewall blocking it. The "Your connection" indicator pings several major CDNs in parallel; if those all fail, it's almost certainly your end. If most sites are up but one is down, it's theirs.
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal">
+  <div class="modal" role="dialog" aria-labelledby="modalTitle">
+    <div class="modal-head">
+      <h2 id="modalTitle">Manage sites</h2>
+      <button class="modal-close" id="modalClose" aria-label="Close">×</button>
+    </div>
+    <div class="add-form">
+      <input type="text" id="newName" placeholder="Name (e.g. GitHub)">
+      <input type="url" id="newUrl" placeholder="URL (https://...)">
+      <input type="text" id="newCat" placeholder="Category (optional)">
+      <button class="primary" id="addBtn">Add</button>
+    </div>
+    <div class="site-list" id="siteList"></div>
+    <div class="modal-footer">
+      <span id="siteCount">0 sites</span>
+      <button id="resetBtn">Reset to defaults</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const DEFAULT_SITES = [
+    // Search & general
+    { name: "Google",       url: "https://www.google.com",       cat: "Search & web" },
+    { name: "Cloudflare",   url: "https://www.cloudflare.com",   cat: "Search & web" },
+    { name: "Wikipedia",    url: "https://www.wikipedia.org",    cat: "Search & web" },
+    { name: "DuckDuckGo",   url: "https://duckduckgo.com",       cat: "Search & web" },
+
+    // AI
+    { name: "Claude",       url: "https://claude.ai",            cat: "AI" },
+    { name: "Anthropic",    url: "https://www.anthropic.com",    cat: "AI" },
+    { name: "ChatGPT",      url: "https://chatgpt.com",          cat: "AI" },
+    { name: "OpenAI",       url: "https://openai.com",           cat: "AI" },
+    { name: "Gemini",       url: "https://gemini.google.com",    cat: "AI" },
+    { name: "Perplexity",   url: "https://www.perplexity.ai",    cat: "AI" },
+    { name: "Hugging Face", url: "https://huggingface.co",       cat: "AI" },
+
+    // Streaming / video / social
+    { name: "Twitch",       url: "https://www.twitch.tv",        cat: "Streaming & social" },
+    { name: "YouTube",      url: "https://www.youtube.com",      cat: "Streaming & social" },
+    { name: "Discord",      url: "https://discord.com",          cat: "Streaming & social" },
+    { name: "Reddit",       url: "https://www.reddit.com",       cat: "Streaming & social" },
+    { name: "X (Twitter)",  url: "https://x.com",                cat: "Streaming & social" },
+    { name: "Spotify",      url: "https://www.spotify.com",      cat: "Streaming & social" },
+
+    // Developer / software
+    { name: "GitHub",       url: "https://github.com",           cat: "Developer & software" },
+    { name: "GitLab",       url: "https://gitlab.com",           cat: "Developer & software" },
+    { name: "Stack Overflow", url: "https://stackoverflow.com",  cat: "Developer & software" },
+    { name: "npm",          url: "https://www.npmjs.com",        cat: "Developer & software" },
+    { name: "PyPI",         url: "https://pypi.org",             cat: "Developer & software" },
+    { name: "Docker Hub",   url: "https://hub.docker.com",       cat: "Developer & software" },
+    { name: "AWS",          url: "https://aws.amazon.com",       cat: "Developer & software" },
+    { name: "VS Code",      url: "https://code.visualstudio.com", cat: "Developer & software" },
+  ];
+
+  const STORAGE_KEY = "netmon_sites_v1";
+  function loadSites() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return [...DEFAULT_SITES];
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed) || parsed.length === 0) return [...DEFAULT_SITES];
+      return parsed.filter(s => s && s.name && s.url);
+    } catch { return [...DEFAULT_SITES]; }
+  }
+  function saveSites() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(SITES)); } catch {}
+  }
+  let SITES = loadSites();
+
+  // Self-test endpoints — used to determine if user's connection itself is down
+  const SELF_TEST_URLS = [
+    "https://www.cloudflare.com/favicon.ico",
+    "https://www.google.com/favicon.ico",
+    "https://www.wikipedia.org/static/favicon/wikipedia.ico",
+  ];
+
+  const HISTORY_LEN = 20;
+  const TIMEOUT_MS = 5000;
+  const SLOW_THRESHOLD = 600;
+  const VERY_SLOW_THRESHOLD = 1500;
+
+  // Estimated bytes per check when we can't measure for real.
+  // ~600 bytes request + ~600 bytes response headers + ~3 KB body avg = ~4 KB
+  const ESTIMATED_BYTES_PER_CHECK = 4096;
+  const SESSION_START = Date.now();
+
+  function fmtBytes(b) {
+    if (b < 1024) return b + " B";
+    if (b < 1024 * 1024) return (b / 1024).toFixed(b < 10240 ? 1 : 0) + " KB";
+    return (b / (1024 * 1024)).toFixed(2) + " MB";
+  }
+
+  // Try to read real transfer size from the Resource Timing API.
+  // Most cross-origin servers don't send Timing-Allow-Origin, so this returns 0.
+  function getRealTransferSize(urlPrefix) {
+    try {
+      const entries = performance.getEntriesByType("resource");
+      // Find the most recent matching entry
+      for (let i = entries.length - 1; i >= 0; i--) {
+        if (entries[i].name.startsWith(urlPrefix)) {
+          const e = entries[i];
+          // transferSize > 0 means the server allowed timing
+          if (e.transferSize > 0) {
+            return { real: true, bytes: e.transferSize };
+          }
+          return null;
+        }
+      }
+    } catch {}
+    return null;
+  }
+
+  const state = new Map(); // name -> { history: [{ms, status}], lastCheck }
+
+  function faviconURL(siteUrl) {
+    try {
+      const u = new URL(siteUrl);
+      return `${u.origin}/favicon.ico`;
+    } catch { return ""; }
+  }
+
+  function googleFavicon(siteUrl) {
+    try {
+      const u = new URL(siteUrl);
+      return `https://www.google.com/s2/favicons?domain=${u.hostname}&sz=32`;
+    } catch { return ""; }
+  }
+
+  // Check a site by loading its favicon with a cache-buster.
+  // Resolves with { ms, status, urlPrefix } where status is 'up'|'slow'|'down'.
+  function checkSite(siteUrl) {
+    return new Promise((resolve) => {
+      const urlPrefix = faviconURL(siteUrl);
+      const url = urlPrefix + "?_=" + Date.now();
+      const start = performance.now();
+      let done = false;
+      const img = new Image();
+
+      const finish = (status) => {
+        if (done) return;
+        done = true;
+        const ms = Math.round(performance.now() - start);
+        resolve({ ms, status, urlPrefix });
+      };
+
+      const timer = setTimeout(() => finish("down"), TIMEOUT_MS);
+
+      img.onload = () => {
+        clearTimeout(timer);
+        const ms = performance.now() - start;
+        if (ms > VERY_SLOW_THRESHOLD) finish("slow");
+        else if (ms > SLOW_THRESHOLD) finish("slow");
+        else finish("up");
+      };
+      img.onerror = () => {
+        clearTimeout(timer);
+        // onerror can fire on success for some servers serving favicon as non-image,
+        // or on real failure. Treat fast onerror as "up" since the network round-trip worked.
+        const ms = performance.now() - start;
+        if (ms < TIMEOUT_MS - 100 && ms < 2500) {
+          // round trip happened, server responded (just not with a parseable image)
+          finish(ms > SLOW_THRESHOLD ? "slow" : "up");
+        } else {
+          finish("down");
+        }
+      };
+      img.src = url;
+    });
+  }
+
+  function statusClass(s) {
+    if (s === "up") return "status-up";
+    if (s === "slow") return "status-slow";
+    if (s === "down") return "status-down";
+    if (s === "pending") return "status-pending";
+    return "status-unknown";
+  }
+  function statusText(s) {
+    if (s === "up") return "Up";
+    if (s === "slow") return "Slow";
+    if (s === "down") return "Down";
+    if (s === "pending") return "Checking";
+    return "Unknown";
+  }
+
+  function buildGrid() {
+    const grid = document.getElementById("grid");
+    grid.innerHTML = "";
+    const seen = new Set();
+
+    for (const site of SITES) {
+      if (!seen.has(site.cat)) {
+        const h = document.createElement("div");
+        h.className = "category";
+        h.textContent = site.cat;
+        grid.appendChild(h);
+        seen.add(site.cat);
+      }
+
+      const card = document.createElement("div");
+      card.className = "card";
+      card.id = `card-${site.name}`;
+      card.innerHTML = `
+        <div class="card-head">
+          <div class="site-name">
+            <img class="favicon" src="${googleFavicon(site.url)}" alt="" onerror="this.style.visibility='hidden'">
+            <span>${site.name}</span>
+          </div>
+          <span class="status-pill status-unknown" id="pill-${site.name}">
+            <span class="dot"></span><span>Pending</span>
+          </span>
+        </div>
+        <div class="latency">
+          <div><span class="num" id="lat-${site.name}">—</span> <span class="unit">ms</span></div>
+          <div id="avg-${site.name}" style="font-size:11px;">avg —</div>
+        </div>
+        <div class="sparkline" id="spark-${site.name}"></div>
+        <div class="meta">
+          <span id="time-${site.name}">never checked</span>
+          <span id="up-${site.name}">—</span>
+        </div>
+        <div class="meta data-meta">
+          <span id="data-${site.name}">data: —</span>
+          <span id="checks-${site.name}">0 checks</span>
+        </div>
+      `;
+      grid.appendChild(card);
+      state.set(site.name, { history: [], lastCheck: null, totalBytes: 0, checks: 0, realBytes: 0, realCount: 0 });
+    }
+  }
+
+  function updateCard(site, result) {
+    const { ms, status, urlPrefix } = result;
+    const s = state.get(site.name);
+    s.history.push({ ms, status });
+    if (s.history.length > HISTORY_LEN) s.history.shift();
+    s.lastCheck = Date.now();
+    s.checks += 1;
+
+    // Try real bytes from Resource Timing; fall back to estimate.
+    let bytesThisCheck = ESTIMATED_BYTES_PER_CHECK;
+    let isReal = false;
+    if (status !== "down") {
+      const real = getRealTransferSize(urlPrefix);
+      if (real && real.bytes > 0) {
+        bytesThisCheck = real.bytes;
+        isReal = true;
+        s.realBytes += real.bytes;
+        s.realCount += 1;
+      }
+    } else {
+      // Failed request: smaller — just headers, no body
+      bytesThisCheck = 800;
+    }
+    s.totalBytes += bytesThisCheck;
+
+    const pill = document.getElementById(`pill-${site.name}`);
+    pill.className = `status-pill ${statusClass(status)}`;
+    pill.innerHTML = `<span class="dot"></span><span>${statusText(status)}</span>`;
+
+    document.getElementById(`lat-${site.name}`).textContent = status === "down" ? "—" : ms;
+
+    const ups = s.history.filter(h => h.status !== "down").length;
+    const upPct = Math.round((ups / s.history.length) * 100);
+    document.getElementById(`up-${site.name}`).textContent = `${upPct}% up`;
+
+    const okSamples = s.history.filter(h => h.status !== "down");
+    if (okSamples.length) {
+      const avg = Math.round(okSamples.reduce((a, b) => a + b.ms, 0) / okSamples.length);
+      document.getElementById(`avg-${site.name}`).textContent = `avg ${avg} ms`;
+    }
+
+    const t = new Date(s.lastCheck);
+    const timeStr = t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    document.getElementById(`time-${site.name}`).textContent = timeStr;
+
+    // sparkline
+    const spark = document.getElementById(`spark-${site.name}`);
+    spark.innerHTML = "";
+    const max = Math.max(800, ...s.history.map(h => h.ms));
+    for (let i = 0; i < HISTORY_LEN; i++) {
+      const idx = s.history.length - HISTORY_LEN + i;
+      const bar = document.createElement("div");
+      bar.className = "bar";
+      if (idx < 0 || idx >= s.history.length) {
+        bar.classList.add("b-empty");
+        bar.style.height = "10%";
+      } else {
+        const h = s.history[idx];
+        if (h.status === "down") {
+          bar.classList.add("b-bad");
+          bar.style.height = "100%";
+        } else {
+          if (h.status === "slow") bar.classList.add("b-slow");
+          else bar.classList.add("b-good");
+          const pct = Math.max(8, Math.min(100, (h.ms / max) * 100));
+          bar.style.height = pct + "%";
+        }
+      }
+      spark.appendChild(bar);
+    }
+
+    document.getElementById(`card-${site.name}`).classList.remove("checking");
+
+    // Per-site data display
+    const dataEl = document.getElementById(`data-${site.name}`);
+    const realTag = s.realCount > 0 ? `<span class="real">●</span> ` : "~";
+    dataEl.innerHTML = `${realTag} ${fmtBytes(s.totalBytes)}`;
+    dataEl.title = s.realCount > 0
+      ? `${s.realCount} of ${s.checks} checks measured exactly via Resource Timing API. Rest are estimated at ~4 KB.`
+      : `Estimated at ~4 KB per check. This site doesn't expose real transfer size to JavaScript.`;
+    document.getElementById(`checks-${site.name}`).textContent = `${s.checks} check${s.checks === 1 ? "" : "s"}`;
+
+    updateTotals();
+  }
+
+  function updateTotals() {
+    let total = 0, totalChecks = 0, anyReal = false;
+    for (const [, s] of state) {
+      total += s.totalBytes;
+      totalChecks += s.checks;
+      if (s.realCount > 0) anyReal = true;
+    }
+    const sites = state.size || 1;
+    const avgPerSite = total / sites;
+    const perCheck = totalChecks > 0 ? total / (totalChecks / sites) / sites : 0;
+    // perCheck = total bytes per single full sweep across all sites
+    const sweeps = totalChecks / sites;
+    const perSweep = sweeps > 0 ? total / sweeps : 0;
+
+    const sessionMin = (Date.now() - SESSION_START) / 60000;
+    const projHour = sessionMin > 0 ? (total / sessionMin) * 60 : 0;
+
+    document.getElementById("totalData").innerHTML  = fmtBytes(total).replace(/ /, '<span class="unit"> ') + "</span>";
+    document.getElementById("perCheck").innerHTML   = fmtBytes(perSweep).replace(/ /, '<span class="unit"> ') + "</span>";
+    document.getElementById("avgPerSite").innerHTML = fmtBytes(avgPerSite).replace(/ /, '<span class="unit"> ') + "</span>";
+    document.getElementById("totalChecks").textContent = totalChecks.toLocaleString();
+    document.getElementById("sessionTime").innerHTML = sessionMin < 1
+      ? Math.round(sessionMin * 60) + '<span class="unit"> sec</span>'
+      : sessionMin.toFixed(1) + '<span class="unit"> min</span>';
+    document.getElementById("projHour").innerHTML = fmtBytes(projHour).replace(/ /, '<span class="unit"> ') + "</span>";
+  }
+
+  async function selfTest() {
+    const results = await Promise.all(SELF_TEST_URLS.map(u => new Promise(res => {
+      const img = new Image();
+      const start = performance.now();
+      const t = setTimeout(() => res({ ok: false, ms: TIMEOUT_MS }), TIMEOUT_MS);
+      img.onload = () => { clearTimeout(t); res({ ok: true, ms: performance.now() - start }); };
+      img.onerror = () => {
+        clearTimeout(t);
+        const ms = performance.now() - start;
+        res({ ok: ms < TIMEOUT_MS - 100, ms });
+      };
+      img.src = u + "?_=" + Date.now();
+    })));
+    const oks = results.filter(r => r.ok).length;
+    return { oks, total: results.length, results };
+  }
+
+  function setSelfStatus(text, color, verdict, verdictClass) {
+    const ss = document.getElementById("selfStatus");
+    ss.innerHTML = `<span class="dot" style="background:${color}"></span><span>${text}</span>`;
+    const v = document.getElementById("verdict");
+    v.textContent = verdict;
+    v.className = "verdict " + (verdictClass || "");
+  }
+
+  async function runAll() {
+    document.getElementById("refreshBtn").disabled = true;
+
+    // Mark all as checking
+    for (const site of SITES) {
+      const card = document.getElementById(`card-${site.name}`);
+      card.classList.add("checking");
+      const pill = document.getElementById(`pill-${site.name}`);
+      pill.className = "status-pill status-pending";
+      pill.innerHTML = `<span class="dot"></span><span>Checking</span>`;
+    }
+
+    setSelfStatus("Testing…", "var(--accent)", "Running self-test on major CDNs…", "");
+
+    // Run self-test in parallel with site checks
+    const [selfResult, ...siteResults] = await Promise.all([
+      selfTest(),
+      ...SITES.map(async site => {
+        const r = await checkSite(site.url);
+        updateCard(site, r);
+        return { site, ...r };
+      }),
+    ]);
+
+    // Self-test verdict
+    if (selfResult.oks === 0) {
+      setSelfStatus("Offline", "var(--bad)", "Major CDNs all unreachable — your connection is down.", "danger");
+    } else if (selfResult.oks < selfResult.total) {
+      setSelfStatus("Patchy", "var(--warn)", "Some major CDNs failed — your connection is unstable.", "warning");
+    } else {
+      // Self looks fine — analyze how many sites are down
+      const down = siteResults.filter(r => r.status === "down").length;
+      const slow = siteResults.filter(r => r.status === "slow").length;
+      const total = siteResults.length;
+
+      if (down === 0 && slow <= 2) {
+        setSelfStatus("Online", "var(--good)", `All systems normal — ${total - down - slow} of ${total} sites responding fast.`, "ok");
+      } else if (down >= total * 0.5) {
+        setSelfStatus("Online (but)", "var(--warn)", `Your connection is fine, but ${down} sites are unreachable — could be DNS, ISP routing, or a wide outage.`, "warning");
+      } else if (down > 0) {
+        const downNames = siteResults.filter(r => r.status === "down").map(r => r.site.name).join(", ");
+        setSelfStatus("Online", "var(--good)", `Your connection is fine. Down: ${downNames}. Likely their problem.`, "ok");
+      } else {
+        setSelfStatus("Online", "var(--good)", `Your connection is fine. ${slow} sites running slow.`, "ok");
+      }
+    }
+
+    document.getElementById("refreshBtn").disabled = false;
+  }
+
+  let timer = null;
+  function scheduleAuto() {
+    if (timer) { clearInterval(timer); timer = null; }
+    if (!document.getElementById("autoRefresh").checked) return;
+    const sec = parseInt(document.getElementById("interval").value, 10);
+    timer = setInterval(runAll, sec * 1000);
+  }
+
+  document.getElementById("refreshBtn").addEventListener("click", runAll);
+  document.getElementById("autoRefresh").addEventListener("change", scheduleAuto);
+  document.getElementById("interval").addEventListener("change", scheduleAuto);
+
+  // ---- Manage modal ----
+  const modal = document.getElementById("modal");
+  const siteListEl = document.getElementById("siteList");
+  const siteCountEl = document.getElementById("siteCount");
+
+  function renderSiteList() {
+    siteListEl.innerHTML = "";
+    SITES.forEach((site, i) => {
+      const row = document.createElement("div");
+      row.className = "site-row";
+      row.innerHTML = `
+        <div class="info">
+          <img src="${googleFavicon(site.url)}" alt="" onerror="this.style.visibility='hidden'">
+          <div style="min-width:0;">
+            <div class="name">${escapeHTML(site.name)}</div>
+            <div class="url">${escapeHTML(site.url)}</div>
+          </div>
+        </div>
+        <span class="cat-pill">${escapeHTML(site.cat || "Other")}</span>
+        <button class="remove-btn" data-i="${i}">Remove</button>
+      `;
+      siteListEl.appendChild(row);
+    });
+    siteCountEl.textContent = `${SITES.length} site${SITES.length === 1 ? "" : "s"}`;
+    siteListEl.querySelectorAll(".remove-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const idx = parseInt(btn.dataset.i, 10);
+        SITES.splice(idx, 1);
+        saveSites();
+        renderSiteList();
+      });
+    });
+  }
+
+  function escapeHTML(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[c]));
+  }
+
+  function openModal() {
+    renderSiteList();
+    modal.classList.add("open");
+  }
+  function closeModal() {
+    modal.classList.remove("open");
+    // Rebuild dashboard with whatever is now in SITES
+    state.clear();
+    buildGrid();
+    runAll();
+  }
+
+  document.getElementById("manageBtn").addEventListener("click", openModal);
+  document.getElementById("modalClose").addEventListener("click", closeModal);
+  modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modal.classList.contains("open")) closeModal();
+  });
+
+  document.getElementById("addBtn").addEventListener("click", () => {
+    const nameEl = document.getElementById("newName");
+    const urlEl = document.getElementById("newUrl");
+    const catEl = document.getElementById("newCat");
+    let name = nameEl.value.trim();
+    let url = urlEl.value.trim();
+    const cat = catEl.value.trim() || "Custom";
+    if (!name || !url) {
+      if (!url) urlEl.focus(); else nameEl.focus();
+      return;
+    }
+    if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+    try { new URL(url); } catch { urlEl.focus(); return; }
+
+    SITES.push({ name, url, cat });
+    saveSites();
+    nameEl.value = ""; urlEl.value = ""; catEl.value = "";
+    renderSiteList();
+    nameEl.focus();
+  });
+
+  // Enter key in any add-form input adds the site
+  ["newName","newUrl","newCat"].forEach(id => {
+    document.getElementById(id).addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("addBtn").click();
+    });
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    if (!confirm("Reset to the default list of sites? Your custom sites will be removed.")) return;
+    SITES = [...DEFAULT_SITES];
+    saveSites();
+    renderSiteList();
+  });
+
+  buildGrid();
+  runAll();
+  scheduleAuto();
+
+  // Keep session time + projection ticking even between checks
+  setInterval(updateTotals, 10000);
+</script>
+</body>
+</html>
